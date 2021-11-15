@@ -1,179 +1,159 @@
-# MMM - console crypto exchange imitation made with using sockets.
+# DeFinitely Not Scam Exchange is a console based cryptocurrency exchange simulation that uses sockets.
 
-## Команды
+## Commands
 
-### Взаимодействие с токенами
+### Token operations
 
-1. ```buy``` выставляет ордер на покупку акций, ищет подходящее предложение и если нашлось, скупает нужное кол-во, если купилось не все, запрос уходит в бд. Результат печатается
+#### 1. Command: `buy` _(auth required)_
 
+Fills all suitable for `amount` and `exchange_rate` (if specified) sell orders, then, if the amount of bought tokens is less than the specified `amount`, places a buy order.
 
-Обязательные аргументы:
+Required arguements:
+- `token_to_buy` (flags: `-bt`, `--buy_token`; type: `str`) - tag of the token to buy.
+- `amount` (flags: `-a`, `--amount`; type: `float`) - amount of \*_token_to_buy_\* tokens to buy.
+- `token_to_sell` (flags: `-st`, `--sell_token`; type: `str`) - tag of the token to sell.
 
-```token_tag``` ~~(флаг: ```-t``` ```--token```)~~ - наименование токена, которое хотим купить. Тип: ```str```
-
-```count``` ~~(флаг: ```-c``` ```--count```)~~ - количество токенов, которое хотим купить. Тип: ```float```
-
-```for_token_tag``` ~~(флаг: ```-ft``` ```--fortoken```)~~ - наименование токена, **ЗА** которое хотим купить. Тип: ```str```
-
-Необязательные аргументы:
-
-```price``` ~~(флаги: ```-p``` ```price```)~~. Если указан - покупаются монетки по указанной цене, если купилось не все, создаются ордера на покупку. Если не указан - происходит мгновенная покупка нужного количества токенов, если купилось не все, создается ордер на покупку за любую цену. Тип: ```float```
+Optional arguements:
+- `exchange_rate` (flags: `-xr`, `--exchange_rate`; type: `float`) - amount of \*_token_to_sell_\* tokens per one \*_token_to_buy_\* token.
 
 <details>
-  <summary>Пример</summary>
+  <summary>Example</summary>
+    buy -bt BTC -n 0.289 -st DOGE -xr 249838.36<br><br>
+    Bought 0.14 BTC (249838.33 DOGE per 1 BTC)<br>
+    Bought 0.0238 BTC (249838.36 DOGE per 1 BTC)<br>
+    Placed 0.1252 BTC buy order (249838.36 DOGE per 1 BTC)
+</details>
+
+#### 2. Command: `sell` _(auth required)_
+
+Fills all suitable for `amount` and `exchange_rate` (if specified) buy orders, then, if the amount of sold tokens is less than the specified `amount`, places a sell order.
+
+Required arguements:
+- `token_to_sell` (flags: `-st`, `--sell_token`; type: `str`) - tag of the token to sell.
+- `amount` (flags: `-a`, `--amount`; type: `float`) - amount of \*_token_to_sell_\* tokens to sell.
+- `token_to_buy` (flags: `-bt`, `--buy_token`; type: `str`) - tag of the token to buy.
+
+Optional arguements:
+- `exchange_rate` (flags: `-xr`, `--exchange_rate`; type: `float`) - amount of \*_token_to_buy_\* tokens per one \*_token_to_sell_\* token.
+
+<details>
+  <summary>Example</summary>
+    sell -st DOGE -n 72203.28 -bt BTC -xr 0.0000040<br><br>
+    Sold 34977.37 DOGE (0.0000039 per 1 DOGE)<br>
+    Sold 2343.89 DOGE (0.0000040 DOGE per 1 BTC)<br>
+    Placed 34882.02 DOGE sell order (0.0000040 BTC per 1 DOGE)
+</details>
+
+#### 3. Command: `add` _(auth and admin rights required)_
+
+Adds new tokens with the specified `tag` and `quantity` to address of the user who executed the command.
+
+Required arguements:
+`tag` (flags: `-t`, `--tag`; type: `str`) - unique token tag.
+`quantity` (flags: `-q`, `--quantity`; type: `float`) - quantity of tokens to add.
+
+<details>
+  <summary>Example</summary>
+    add -t DNS -a 666
+</details>
+
+#### 4. Command: `list` _(auth required)_
+
+Shows all tokens.
+
+<details>
+  <summary>Example</summary>
+    list
+
+    tag       quantity
+    BTC       283923.9897
+    BNB       3209.36
+    DOGE      283423289.617
+    DNS       83429384.2938
+</details>
+
+### Account operations
+
+#### 1. Command: `create_account`
+
+Creates new account.
+
+<details>
+  <summary>Example</summary>
+    create_account<br><br>
+    New account is created!<br>
+    address: 0x2387hf823u<br>
+    seed_phrase: red garden awesome run chocolate nice
+</details>
+
+#### 2. Command: `import_account`
+
+Checks if there is account with the given `seed_phrase`, if yes: logs in, if not: shows an error.
+
+Required arguements:
+`seed_phrase` (flags: `-sp`, `--seed_phrase`; type: `str`) - seed phrase (consists from 6 random english words).
+
+<details>
+  <summary>Example</summary>
+    import_account -sp red garden awesome run chocolate nice<br><br>
+    Successfully imported!
+</details>
+
+#### 3. Command: `scan_transactions`
+
+Shows recent `number` transactions (from all addresses).
+
+Optional arguements:
+`number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
+
+<details>
+  <summary>Example</summary>
+    scan_transactions -n 3
+
+    sender_address      receiver_address    token_tag   count
+    0x2387hf823u        0x98238hgn3g        BTC         2498.298
+    0x2h4982h294        0x2387hf823u        DNS         32.026
+    0x98238hgn3g        0x2h4982h294        BNB         224.2396
+</details>
+
+#### 4. Command: `info`
+
+Shows account info by it's address. Shown info: assets and last `number` transactions.
+
+Required arguements:
+`address` (flags: `-a`, `--address`; type: `str`) - unique account's address.
+
+Optional arguements:
+`number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
+
+<details>
+  <summary>Example</summary>
+    <br>info -a 0x2387hf823u<br><br>
+
+    token_tag       amount
+    BTC             3942.32
+    BNB             873.81
+    DNS             91.073
   
-    Bought 234.233 BTR for 2893.233 USD
-
-    Bought 23.233 BTR for 289.22343 BTN
-
-    Bought 12.233 BTR for 145.9681 USD
-
-    Placed 234.234 BTR to buy for 23479.23453 USD
-
+    sender_address      receiver_address    token_tag   count
+    0x2387hf823u        0x98238hgn3g        BTC         2498.298
+    0x2387hf823u        0x2387hf823u        DNS         32.026
+    0x2387hf823u        0x2h4982h294        BNB         224.2396
 </details>
-&nbsp;
 
-2. ```sell``` выставляет запрос на продажу монет, ищется подходящее предложение и если нашлось, продает нужное кол-во, если продались не все, запрос уходит в бд. Результат печатается
+#### 4. Command: `my_account`
 
-Обязательные аргументы:
-
-```token_tag``` ~~(флаг: ```-t``` ```--token```)~~ - наименование токена, которое хотим продать. Тип: ```str```
-
-```count``` ~~(флаг: ```-c``` ```--count```)~~ - количество токенов, которое хотим продать. Тип: ```float```
-
-```for_token_tag``` ~~(флаг: ```-ft``` ```--fortoken```)~~ - наименование токена, **ЗА** которое хотим продать. Тип: ```str```
-
-```price``` ~~(флаги: ```-p``` ```price```)~~ - цена, за которую хотим продать. Тип: ```float```
+Shows account's info.
 
 <details>
-  <summary>Пример</summary>
-  
-    Sold 234.233 BTR for 2893.233 USD
-
-    Sold 23.233 BTR for 289.22343 USD
-
-    Sold 12.233 BTR for 145.9681 USD
-
-    Placed 234.234 BTR to sell for 23479.23453 USD
-
+  <summary>Example</summary>
+    <br>my_account<br><br>
+    0x2387hf823u
 </details>
-&nbsp;
 
-3. ```add``` создает новые монеты в бд, с нужным стартовым прайсом,тегом и количеством. **Могут только админы**
+## Features
 
-Обязательные аргументы:
-
-```token_tag``` ~~(флаг: ```-t``` ```--token```)~~ - наименование токена. Тип: ```str```
-
-```count``` ~~(флаг: ```-c``` ```--count```)~~ - количество токенов, которое хотим выставить. Тип: ```int```
-
-```price``` ~~(флаги: ```-p``` ```price```)~~ - стартовая цена. Тип: ```float```
-
-4. ```list``` - показывает список всех токенов и инфофрмацию про них (тэг, минимальный ордер на продажу, максимальный ордер на покупку, количество на площадке) 
-
-Аргументы:
-
-~~(аргументы для фильтрации, возможно, будут позже)~~ 
-
-<details>
-  <summary>Пример</summary>
-  
-    token_tag       max_buy_order       min_sell_order      quantity
-
-    BTR             78.0328             78.0423             283923
-    GTR             738.29              740.87              3209
-    KHER            287.982             288.109             283423289
-
-</details>
-&nbsp;
-
-### Юзер
-
-1. ```create_account``` создает пользователя. Показывает ему **seed phrase** (это уникальный набор из 6 рандомных слов на английском) и **account_address** 
-
-<details>
-  <summary>Пример</summary>
-  
-    address: 0x2387hf823uf
-
-    seed phrase: red garden awesome run chocolate nice
-
-</details>
-&nbsp;
-
-2. ```import_account``` проверяет есть ли аккаунт с такой **seed phrase**, если есть, то входит в него, если нет, то сообщает об ошибке
-
-Обязательные аргументы:
-
-```seed phrase``` ~~(флаги: ```-sp``` ```--seedphrase```)~~ - уникальное слово. Тип: ```str```
-
-3. ```scan``` выводит список из последних ```count``` транзакций всех аккаунтов
-
-Необязательные аргументы:
-
-```count``` ~~(флаг: ```-c``` ```--count```)~~ - количество последних транзакций, которые хотим получить. Тип: ```int```. Дефолтное значение: ```10```
-
-<details>
-  <summary>Пример</summary>
-  
-    sender_address      receiver_address    token_tag   count   
-
-    0x2387hf823uf       0x3k29hf8i93        BTR         666.29889
-
-    0x2h4982h294        0x2839fh293         GTR         32.026
-
-    0x2387hf823uf       0x3k29hf8i93        MPS         224.2396
-
-</details>
-&nbsp;
-
-4. ```info``` выводит информацию о всех токенах и их количестве пользователя по его ```address```, а также о последних ```count``` транзакций
-
-Обязательные аргументы:
-
-```address``` ~~(флаг: ```-a``` ```--address```)~~ - уникальный номер пользователя.
-
-Необязательные аргументы:
-
-```count``` ~~(флаг: ```-c``` ```--count```)~~ - количество последних транзакций, которые хотим получить. Тип: ```int```. Дефолтное значение: ```10```
-
-<details>
-  <summary>Пример</summary>
-
-    token_tag       count
-
-    BTR             666.32648
-
-    TWT             3942.23
-
-    BNB             91.789
-
-  
-    sender_address      receiver_address    token_tag   count   
-
-    x2387hf823uf        0x3k29hf8i93        BTR            666.29889
-
-    0x2387hf823uf       0x2839fh293         GTR            32.026
-
-    0x2387hf823uf       0x2h4982h29         MPS            224.2396
-
-</details>
-&nbsp;
-
-5. ```my_account``` выводит адрес пользователя
-
-<details>
-  <summary>Пример</summary>
-
-    0x2387hf823uf
-
-</details>
-&nbsp;
-
-## Фишки
-
-1. Имитация криптомира, криптоРамиля, криптоРуслана, криптоИльнара
-
-2. Комиссия 0.1% на все сделки для всех юзеров, кроме админов
-
-3. We are not a freeloaders we are partners...........
+1. Seed phrases
+2. Hash addresses
+3. Open history of transactions and account assets info
+4. 0.1% commission for all user operations
