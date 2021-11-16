@@ -21,7 +21,7 @@ Example:
 ```
 create_account
 
-New account is created!
+New account has been successfully created!
 address: 0x2387hf823u
 seed_phrase: red garden awesome run chocolate nice
 ```
@@ -30,8 +30,8 @@ seed_phrase: red garden awesome run chocolate nice
 
 Checks if there is account with the given `seed_phrase`, if yes: logs in, if not: shows an error.
 
-Required arguements:
-`seed_phrase` (flags: `-sp`, `--seed_phrase`; type: `str`) - seed phrase (consists from 6 random english words).
+Required arguments:
+- `seed_phrase` (flags: `-sp`, `--seed-phrase`; type: `str`) - seed phrase (consists from 6 random english words).
 
 Example:
 ```
@@ -42,7 +42,7 @@ Account has been successfully imported!
 
 ### 3. `my_account` _(auth required)_
 
-Displays account's info.
+Displays current account's info.
 
 Example:
 ```
@@ -55,22 +55,22 @@ address: 0x2387hf823u
 
 Displays account info by it's address. Shown info: assets and last `number` transactions.
 
-Required arguements:
-`address` (flags: `-a`, `--address`; type: `str`) - unique account's address.
+Required arguments:
+- `address` (flags: `-a`, `--address`; type: `str`) - unique account's address.
 
-Optional arguements:
-`number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
+Optional arguments:
+- `number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
 
 Example:
 ```
-info -a 0x2387hf823u
+account_info -a 0x2387hf823u -n 3
 
 token_tag       amount
 BTC             3942.32
 BNB             873.81
 DNS             91.073
 
-sender_address      receiver_address    token_tag   count
+sender_address      receiver_address    token_tag   amount
 0x2387hf823u        0x98238hgn3g        BTC         2498.298
 0x2387hf823u        0x2387hf823u        DNS         32.026
 0x2387hf823u        0x2h4982h294        BNB         224.2396
@@ -82,9 +82,9 @@ sender_address      receiver_address    token_tag   count
 
 Adds new tokens with the specified `tag` and `quantity` to address of the user who executed the command.
 
-Required arguements:
-`tag` (flags: `-t`, `--tag`; type: `str`) - unique token tag.
-`quantity` (flags: `-q`, `--quantity`; type: `float`) - quantity of tokens to add.
+Required arguments:
+- `tag` (flags: `-t`, `--tag`; type: `str`) - unique token tag.
+- `quantity` (flags: `-q`, `--quantity`; type: `float`) - quantity of tokens to add.
 
 Example:
 ```
@@ -95,14 +95,14 @@ add_token -t DNS -q 666
 
 ### 2. `buy` _(auth required)_
 
-Fills all suitable for `amount` and `exchange_rate` (if specified) sell orders for \*_token_1_tag_\* token, then, if the amount of bought tokens is less than the specified `amount`, places a buy order.
+Fills all suitable for `amount` and `exchange_rate` (if specified) sell orders for the first token of the `trading_pair`, then, if the amount of bought tokens is less than the specified `amount`, places a buy order.
 
-Required arguements:
-- `trading_pair` (flags: `-tp`, `--trading_pair`; type: `str`) - label of the trading pair (in \*_token_1_tag_\* + '_' + \*_token_2_tag_\* format).
-- `amount` (flags: `-a`, `--amount`; type: `float`) - amount of \*_token_1_tag_\* tokens to buy.
+Required arguments:
+- `trading_pair` (flags: `-tp`, `--trading-pair`; type: `str`) - label of the trading pair.
+- `amount` (flags: `-a`, `--amount`; type: `float`) - amount of tokens to buy.
 
-Optional arguements:
-- `exchange_rate` (flags: `-xr`, `--exchange_rate`; type: `float`) - amount of \*_token_2_tag_\* tokens per one \*_token_1_tag_\* token.
+Optional arguments:
+- `exchange_rate` (flags: `-xr`, `--exchange-rate`; type: `float`) - amount of `token2` per one `token1`.
 
 Example:
 ```
@@ -113,16 +113,16 @@ Bought 0.0238 BTC (249838.36 DOGE per 1 BTC)
 Placed 0.1252 BTC buy order (249838.36 DOGE per 1 BTC)
 ```
 
-### 3. `sell` _(auth required)_
+### 2. `sell` _(auth required)_
 
-Fills all suitable for `amount` and `exchange_rate` (if specified) buy orders for \*_token_1_tag_\* token, then, if the amount of sold tokens is less than the specified `amount`, places a sell order.
+Fills all suitable for `amount` and `exchange_rate` (if specified) buy orders for the first token of the `trading_pair`, then, if the amount of bought tokens is less than the specified `amount`, places a sell order.
 
-Required arguements:
-- `trading_pair` (flags: `-tp`, `--trading_pair`; type: `str`) - label of the trading pair (in \*_token_1_tag_\* + '_' + \*_token_2_tag_\* format).
-- `amount` (flags: `-a`, `--amount`; type: `float`) - amount of \*_token_1_tag_\* tokens to sell.
+Required arguments:
+- `trading_pair` (flags: `-tp`, `--trading-pair`; type: `str`) - label of the trading pair.
+- `amount` (flags: `-a`, `--amount`; type: `float`) - amount of tokens to buy.
 
-Optional arguements:
-- `exchange_rate` (flags: `-xr`, `--exchange_rate`; type: `float`) - amount of \*_token_2_tag_\* tokens per one \*_token_1_tag_\* token.
+Optional arguments:
+- `exchange_rate` (flags: `-xr`, `--exchange-rate`; type: `float`) - amount of `token2` per one `token1`.
 
 Example:
 ```
@@ -137,11 +137,11 @@ Placed 0.1252 BTC sell order (249838.36 DOGE per 1 BTC)
 
 ### 1. `add_pair` _(auth and admin rights required)_
 
-Adds new trading pair with the \*_token_1_tag_\* + '_' + \*_token_2_tag_\* label to the list of the avaliable pairs.
+Adds new trading pair with the `token1` + '_' + `token2` label to the list of the avaliable pairs.
 
-Required arguements:
-`token1` (flags: `-t1`, `--token1`; type: `str`) - tag of the first token in pair.
-`token2` (flags: `-t2`, `--token2`; type: `str`) - tag of the second token in pair.
+Required arguments:
+- `token1` (flags: `-t1`, `--token1`; type: `str`) - tag of the first token in pair.
+- `token2` (flags: `-t2`, `--token2`; type: `str`) - tag of the second token in pair.
 
 Example:
 ```
@@ -152,15 +152,14 @@ BTC_DOGE pair has been successfully added to the list of the avalialbe pairs!
 
 ### 2. `delete_pair` _(auth and admin rights required)_
 
-Deletes trading pair with the \*_token_1_tag_\*` + '_' + \*_token_2_tag_\* label from the list of the avaliable pairs.
+Deletes trading pair with the given label from the list of the avaliable pairs.
 
-Required arguements:
-`token1` (flags: `-t1`, `--token1`; type: `str`) - tag of the first token in pair.
-`token2` (flags: `-t2`, `--token2`; type: `str`) - tag of the second token in pair.
+Required arguments:
+- `label` (flags: `-l`, `--label`; type: `str`) - label of the pair.
 
 Example:
 ```
-delete_pair -t1 BTC -t2 DOGE
+delete_pair -l BTC_DOGE
 
 BTC_DOGE pair has been successfully removed from the list of the avalialbe pairs!
 ```
@@ -169,16 +168,17 @@ BTC_DOGE pair has been successfully removed from the list of the avalialbe pairs
 
 Displays the list of the avaliable trading pairs.
 
+Optional arguments:
+- `filter_by_label` (flags: `-f`, `--filter`; type: `str`) - string to filter by.
+
 Example:
 ```
-list_pairs
+list_pairs -f BTC
 
 label
 BTC_DOGE
 BTC_BNB
-BTC_TWT
-DNS_DOGE
-DNS_BNB
+DNS_BTC
 ```
 
 ## Transaction
@@ -187,14 +187,14 @@ DNS_BNB
 
 Displays recent `number` transactions (from all addresses).
 
-Optional arguements:
-`number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
+Optional arguments:
+- `number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
 
 Example:
 ```
-scan_transactions -n 3
+list_transactions -n 3
 
-sender_address      receiver_address    token_tag   count
+sender_address      receiver_address    token_tag   amount
 0x2387hf823u        0x98238hgn3g        BTC         2498.298
 0x2h4982h294        0x2387hf823u        DNS         32.026
 0x98238hgn3g        0x2h4982h294        BNB         224.2396
