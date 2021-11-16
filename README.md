@@ -65,15 +65,15 @@ Example:
 ```
 account_info -a 0x2387hf823u -n 3
 
-token_tag       amount
-BTC             3942.32
-BNB             873.81
-DNS             91.073
+token   amount
+BTC     3942.32
+BNB     873.81
+DNS     91.073
 
-sender_address      receiver_address    token_tag   amount
-0x2387hf823u        0x98238hgn3g        BTC         2498.298
-0x2387hf823u        0x2387hf823u        DNS         32.026
-0x2387hf823u        0x2h4982h294        BNB         224.2396
+sender_address      receiver_address    token   amount
+0x2387hf823u        0x98238hgn3g        BTC     2498.298
+0x2387hf823u        0x2387hf823u        DNS     32.026
+0x2387hf823u        0x2h4982h294        BNB     224.2396
 ```
 
 ## Token
@@ -164,7 +164,7 @@ delete_pair -l BTC_DOGE
 BTC_DOGE pair has been successfully removed from the list of the avalialbe pairs!
 ```
 
-### 3. `list_pairs` _(auth required)_
+### 3. `list_pairs`
 
 Displays the list of the avaliable trading pairs.
 
@@ -181,6 +181,32 @@ BTC_BNB
 DNS_BTC
 ```
 
+### 3. `pair_info`
+
+Displays current buy and sell orders.
+
+Required arguments:
+- `label` (flags: `-l`, `--label`; type: `str`) - label of the pair.
+
+Optional arguments:
+- `number` (flags: `-n`, `--number`; type: `int`; default: `5`) - number of each buy/sell orders to show.
+
+
+Example:
+```
+pair_info -l BTC_DOGE -n 3
+
+exchange_rate(DOGE)   amount(BTC)
+sell orders:
+249838.36             8.872
+249838.32             3.12
+249838.31             2.0982
+buy orders:
+249838.27             0.24
+249838.15             13.971
+249838.03             1.739
+```
+
 ## Transaction
 
 ### 1. `list_transactions`
@@ -194,8 +220,8 @@ Example:
 ```
 list_transactions -n 3
 
-sender_address      receiver_address    token_tag   amount
-0x2387hf823u        0x98238hgn3g        BTC         2498.298
-0x2h4982h294        0x2387hf823u        DNS         32.026
-0x98238hgn3g        0x2h4982h294        BNB         224.2396
+sender_address      receiver_address    token   amount
+0x2387hf823u        0x98238hgn3g        BTC     2498.298
+0x2h4982h294        0x2387hf823u        DNS     32.026
+0x98238hgn3g        0x2h4982h294        BNB     224.2396
 ```
