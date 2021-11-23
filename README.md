@@ -20,7 +20,7 @@ Example:
 create_account
 
 New account has been successfully created!
-address: 0x2387hf82
+address: 0x2387af82
 seed_phrase: red garden awesome run chocolate nice
 ```
 
@@ -31,22 +31,32 @@ Checks if there is account with the given `seed_phrase`, if yes: logs in, if not
 Required arguments:
 - `seed_phrase` (flags: `-sp`, `--seed-phrase`; type: `str`) - seed phrase (consists from 6 random english words).
 
-Example:
+Examples:
 ```
 import_account -sp red garden awesome run chocolate nice
 
 Account has been successfully imported!
+```
+```
+import_account -sp car line cozy great meat pop
+
+Error: seed phrase is incorrect!
 ```
 
 ### 3. `my_account` _(auth required)_
 
 Displays current account's info.
 
-Example:
+Examples:
 ```
 my_account
 
-address: 0x2387hf82
+address: 0x2387af82
+```
+```
+my_account
+
+Error: auth is required!
 ```
 
 ### 4. `account_info`
@@ -59,9 +69,9 @@ Required arguments:
 Optional arguments:
 - `number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
 
-Example:
+Examples:
 ```
-account_info -a 0x2387hf82 -n 3
+account_info -a 0x2387af82 -n 3
 
 ASSETS
 token   amount
@@ -71,9 +81,14 @@ DNS     91.073
 
 TRANSACTION HISTORY
 time                    from            to              token   amount
-11/22/2021, 15:44PM     0x2387hf82      0x98238hgn      BTC     2498.298
-11/19/2021, 11:44AM     0x2387hf82      0x2387hf82      DNS     32.026
-10/01/2021, 01:23AM     0x2387hf82      0x2h4982h2      BNB     224.2396
+11/22/2021, 15:44PM     0x2387af82      0x98b238ae      BTC     2498.298
+11/19/2021, 11:44AM     0x2387af82      0x2387af82      DNS     32.026
+10/01/2021, 01:23AM     0x2387af82      0x2c4982a2      BNB     224.2396
+```
+```
+account_info -a 0x0666acab
+
+Error: address in incorrect!
 ```
 
 ## Token
@@ -86,11 +101,16 @@ Required arguments:
 - `tag` (flags: `-t`, `--tag`; type: `str`) - unique token tag.
 - `quantity` (flags: `-q`, `--quantity`; type: `float`) - quantity of tokens to add.
 
-Example:
+Examples:
 ```
 add_token -t DNS -q 666
 
 666 DNS tokens have been successfully added to your account's address!
+```
+```
+add_token -t LOL -q 2970247240
+
+Error: admin rights are required!
 ```
 
 ### 2. `buy` _(auth required)_
@@ -143,11 +163,16 @@ Required arguments:
 - `token1` (flags: `-t1`, `--token1`; type: `str`) - tag of the first token in pair.
 - `token2` (flags: `-t2`, `--token2`; type: `str`) - tag of the second token in pair.
 
-Example:
+Examples:
 ```
 add_pair -t1 BTC -t2 DOGE
 
 BTC_DOGE pair has been successfully added to the list of the avalialbe pairs!
+```
+```
+add_pair -t1 BTC -t2 DOGE
+
+Errr: pair already exsists!
 ```
 
 ### 2. `delete_pair` _(auth and admin rights required)_
@@ -157,11 +182,16 @@ Deletes trading pair with the given label from the list of the avaliable pairs.
 Required arguments:
 - `label` (flags: `-l`, `--label`; type: `str`) - label of the pair.
 
-Example:
+Examples:
 ```
 delete_pair -l BTC_DOGE
 
 BTC_DOGE pair has been successfully removed from the list of the avalialbe pairs!
+```
+```
+pair_info -l BTC_LOL
+
+Eror: pair label is incorrect!
 ```
 
 ### 3. `list_pairs`
@@ -171,7 +201,7 @@ Displays the list of the available trading pairs.
 Optional arguments:
 - `filter_by_label` (flags: `-f`, `--filter`; type: `str`) - string to filter by.
 
-Example:
+Examples:
 ```
 list_pairs -f BTC
 
@@ -179,6 +209,11 @@ label
 BTC_DOGE
 BTC_BNB
 DNS_BTC
+```
+```
+list_pairs
+
+No pairs found!
 ```
 
 ### 3. `pair_info`
@@ -192,7 +227,7 @@ Optional arguments:
 - `number` (flags: `-n`, `--number`; type: `int`; default: `5`) - number of each buy/sell orders to show.
 
 
-Example:
+Examples:
 ```
 pair_info -l BTC_DOGE -n 3
 
@@ -208,6 +243,11 @@ exchange_rate(DOGE)   amount(BTC)
 249838.15             13.971
 249838.03             1.739
 ```
+```
+pair_info -l BTC_LOL
+
+Eror: pair label is incorrect!
+```
 
 ## Transaction
 
@@ -218,12 +258,17 @@ Displays recent `number` transactions from all addresses (sorted by time).
 Optional arguments:
 - `number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
 
-Example:
+Examples:
 ```
 list_transactions -n 3
 
 time                    from            to              token   amount
-11/23/2021, 12:48PM     0x2387hf82      0x98238hgn      BTC     2498.298
-11/23/2021, 12:48PM     0x2h4982h2      0x2387hf82      DNS     32.026
-11/23/2021, 12:47PM     0x98238hgn      0x2h4982h2      BNB     224.2396
+11/23/2021, 12:48PM     0x2387af82      0x98b238ae      BTC     2498.298
+11/23/2021, 12:48PM     0x2c4982a2      0x2387af82      DNS     32.026
+11/23/2021, 12:47PM     0x98b238ae      0x2c4982a2      BNB     224.2396
+```
+```
+list_transactions
+
+No transactions found!
 ```
