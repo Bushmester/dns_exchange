@@ -1,10 +1,11 @@
 # What is DeFinitely Not Scam Exchange?
-It is a console based cryptocurrency exchange simulation that uses sockets.
+It is a console based toy cryptocurrency exchange that uses sockets. There is simulation of _seed phrases\*_, _hash addresses\*_, mining process, buy/sell orders, open transaction history and also 0.1% commission on each deal.
 
 # Definitions
-- **Seed phrase** is a string consisting of 6 random english words. It's generated during account creation, unique for every user and can not be changed! Seed phrase is used to import an account.
-- **Hash address** is a unique string in the _0x\*\*\*\*\*\*\*\*_ format, where * can be replaced with any [a-f] or [0-9] symbol. It's generated during account creation, unique for every user and can not be changed! Hash address is used to define public account's name.
-- **To import account** is to simply log in to it with using seed phrase.
+- **Seed phrase** is a string consisting of 6 random english words. It's generated during account creation, unique for every user and can not be changed! Seed phrase is used to _import an account\*_.
+- **Hash address** is a unique string in the _0x\*\*\*\*\*\*\*\*_ format, where \* can be replaced with any [a-f] or [0-9] symbol. It's generated during account creation, unique for every user and can not be changed! Hash address is used to define public account's name.
+- **To import account** is to simply log in to it with using _seed phrase\*_.
+- **Mining number** is a number from 1 to 10, which is stored on the server. The first account who guesses mining number gets random (from 1.0 to 10.0) amount of DNS to his assets. After number is guessed, it changes.
 
 # Protocol
 Both `request` and `response` are JSON formatted strings with _start;_ at the start and _end;_ at the end.
@@ -16,7 +17,7 @@ Both `request` and `response` are JSON formatted strings with _start;_ at the st
 ```
 start;
 {
-    "token": "auth_token_or_empty",
+    "auth_token": "auth_token_or_empty",
     "command": "command_name",
     "args": [
         {
@@ -35,7 +36,7 @@ On `account_info -a 0x2387af82 -n 3`:
 ```
 start;
 {
-    "token": "7h89thugnt0234thg9epwotjw49hoe4y",
+    "auth_token": "7h89thugnt0234thg9epwotjw49hoe4y",
     "command": "account_info",
     "args": [
         {
@@ -58,7 +59,7 @@ end;
 ```
 start;
 {
-    "token": "auth_token_or_empty",
+    "auth_token": "auth_token_or_empty",
     "content": [
         {
             "type": "text",
@@ -92,7 +93,7 @@ On `sell -tp BTC_DOGE -a 0.289 -xr 249838.36`:
 ```
 start;
 {
-    "token": "7h89thugnt0234thg9epwotjw49hoe4y",
+    "auth_token": "7h89thugnt0234thg9epwotjw49hoe4y",
     "content": [
         {
             "type": "text",
@@ -112,7 +113,7 @@ On `account_info -a 0x2387af82 -n 3`:
 ```
 start;
 {
-    "token": "",
+    "auth_token": "",
     "content": [
         {
             "type": "table",
@@ -144,7 +145,7 @@ On `import_account -sp car line cozy great meat pop`:
 ```
 start;
 {
-    "token": "7h89thugnt0234thg9epwotjw49hoe4y",
+    "auth_token": "7h89thugnt0234thg9epwotjw49hoe4y",
     "content": [],
     "errors": ["Seed phrase is incorrect"]
 }
@@ -173,7 +174,7 @@ seed_phrase: red garden awesome run chocolate nice
 Checks if there is account with the given `seed_phrase`, if yes: logs in, if not: shows an error.
 
 Required arguments:
-- `seed_phrase` (flags: `-sp`, `--seed-phrase`; type: `str`) - seed phrase (consists from 6 random english words).
+- `seed_phrase` (flags: `-sp`, `--seed-phrase`; type: `str`) - _seed phrase\*_ (consists from 6 random english words).
 
 Examples:
 ```
@@ -205,10 +206,10 @@ Error: auth is required!
 
 ### 4. `account_info`
 
-Displays account info by its address. Shown info: assets and last `number` transactions (sorted by time).
+Displays account info by its `address`. Shown info: assets and last `number` transactions (sorted by time).
 
 Required arguments:
-- `address` (flags: `-a`, `--address`; type: `str`) - unique account's address.
+- `address` (flags: `-a`, `--address`; type: `str`) - unique account's _hash address\*_.
 
 Optional arguments:
 - `number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
@@ -249,7 +250,7 @@ Examples:
 ```
 add_token -t DNS -q 666
 
-666 DNS tokens have been successfully added to your account's address!
+You've recieved 666 DNS tokens!
 ```
 ```
 add_token -t LOL -q 2970247240
@@ -311,7 +312,7 @@ Examples:
 ```
 add_pair -t1 BTC -t2 DOGE
 
-BTC_DOGE pair has been successfully added to the list of the avalialbe pairs!
+BTC_DOGE pair has been successfully added!
 ```
 ```
 add_pair -t1 BTC -t2 DOGE
@@ -330,7 +331,7 @@ Examples:
 ```
 delete_pair -l BTC_DOGE
 
-BTC_DOGE pair has been successfully removed from the list of the avalialbe pairs!
+BTC_DOGE pair has been successfully removed!
 ```
 ```
 pair_info -l BTC_LOL
@@ -415,4 +416,25 @@ time                    from            to              token   amount
 list_transactions
 
 No transactions found!
+```
+
+## Mining
+
+### 1. `mine` _(auth required)_
+
+Adds DNS tokens to the account, who first guessed current _mining number\*_.
+
+Required arguments:
+- `number` (flags: `-n`, `--number`; type: `int`) - possible number to guess.
+
+Examples:
+```
+mine -n 7
+
+Unsuccessful mining!
+```
+```
+mine -n 9
+
+You've received 3.3487 DNS tokens!
 ```
