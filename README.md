@@ -51,7 +51,7 @@ address: 0x2387hf82
 
 ### 4. `account_info`
 
-Displays account info by it's address. Shown info: assets and last `number` transactions.
+Displays account info by its address. Shown info: assets and last `number` transactions (sorted by time).
 
 Required arguments:
 - `address` (flags: `-a`, `--address`; type: `str`) - unique account's address.
@@ -63,15 +63,17 @@ Example:
 ```
 account_info -a 0x2387hf82 -n 3
 
+ASSETS
 token   amount
 BTC     3942.32
 BNB     873.81
 DNS     91.073
 
-sender_address      receiver_address    token   amount
-0x2387hf82          0x98238hgn          BTC     2498.298
-0x2387hf82          0x2387hf82          DNS     32.026
-0x2387hf82          0x2h4982h2          BNB     224.2396
+TRANSACTION HISTORY
+time                    from            to              token   amount
+11/22/2021, 15:44PM     0x2387hf82      0x98238hgn      BTC     2498.298
+11/19/2021, 11:44AM     0x2387hf82      0x2387hf82      DNS     32.026
+10/01/2021, 01:23AM     0x2387hf82      0x2h4982h2      BNB     224.2396
 ```
 
 ## Token
@@ -164,7 +166,7 @@ BTC_DOGE pair has been successfully removed from the list of the avalialbe pairs
 
 ### 3. `list_pairs`
 
-Displays the list of the avaliable trading pairs.
+Displays the list of the available trading pairs.
 
 Optional arguments:
 - `filter_by_label` (flags: `-f`, `--filter`; type: `str`) - string to filter by.
@@ -211,7 +213,7 @@ exchange_rate(DOGE)   amount(BTC)
 
 ### 1. `list_transactions`
 
-Displays recent `number` transactions (from all addresses).
+Displays recent `number` transactions from all addresses (sorted by time).
 
 Optional arguments:
 - `number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
@@ -220,8 +222,8 @@ Example:
 ```
 list_transactions -n 3
 
-sender_address      receiver_address    token   amount
-0x2387hf82          0x98238hgn          BTC     2498.298
-0x2h4982h2          0x2387hf82          DNS     32.026
-0x98238hgn          0x2h4982h2          BNB     224.2396
+time                    from            to              token   amount
+11/23/2021, 12:48PM     0x2387hf82      0x98238hgn      BTC     2498.298
+11/23/2021, 12:48PM     0x2h4982h2      0x2387hf82      DNS     32.026
+11/23/2021, 12:47PM     0x98238hgn      0x2h4982h2      BNB     224.2396
 ```
