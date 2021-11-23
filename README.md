@@ -5,6 +5,7 @@ It is a console based toy cryptocurrency exchange that uses sockets. There is si
 - **Seed phrase** is a string consisting of 6 random english words. It's generated during account creation, unique for every user and can not be changed! Seed phrase is used to _import an account\*_.
 - **Hash address** is a unique string in the _0x\*\*\*\*\*\*\*\*_ format, where \* can be replaced with any [a-f] or [0-9] symbol. It's generated during account creation, unique for every user and can not be changed! Hash address is used to define public account's name.
 - **To import account** is to simply log in to it with using _seed phrase\*_.
+- **Auth token** is a token to define authenticated users. It's generated from account _seed phrase\*_ with using hash function.
 - **Mining number** is a number from 1 to 10, which is stored on the server. The first account who guesses mining number gets random (from 1.0 to 10.0) amount of DNS to his assets. After number is guessed, it changes.
 
 # Protocol
@@ -240,7 +241,7 @@ Error: address in incorrect!
 
 ### 1. `add_token` _(auth and admin rights required)_
 
-Adds new tokens with the specified `tag` and `quantity` to address of the user who executed the command.
+Adds new tokens with the specified `tag` and `quantity` to _address\*_ of the user who executed the command.
 
 Required arguments:
 - `tag` (flags: `-t`, `--tag`; type: `str`) - unique token tag.
@@ -398,7 +399,7 @@ Eror: pair label is incorrect!
 
 ### 1. `list_transactions`
 
-Displays recent `number` transactions from all addresses (sorted by time).
+Displays recent `number` transactions from all _addresses\*_ (sorted by time).
 
 Optional arguments:
 - `number` (flags: `-n`, `--number`; type: `int`; default: `10`) - number of transactions to show.
