@@ -16,6 +16,7 @@ Both `request` and `response` are JSON formatted strings with _start;_ at the st
 ```
 start;
 {
+    "token": "auth_token_or_empty",
     "command": "command_name",
     "args": [
         {
@@ -34,6 +35,7 @@ On `account_info -a 0x2387af82 -n 3`:
 ```
 start;
 {
+    "token": "7h89thugnt0234thg9epwotjw49hoe4y",
     "command": "account_info",
     "args": [
         {
@@ -56,6 +58,7 @@ end;
 ```
 start;
 {
+    "token": "auth_token_or_empty",
     "content": [
         {
             "type": "text",
@@ -89,6 +92,7 @@ On `sell -tp BTC_DOGE -a 0.289 -xr 249838.36`:
 ```
 start;
 {
+    "token": "7h89thugnt0234thg9epwotjw49hoe4y",
     "content": [
         {
             "type": "text",
@@ -108,6 +112,7 @@ On `account_info -a 0x2387af82 -n 3`:
 ```
 start;
 {
+    "token": "",
     "content": [
         {
             "type": "table",
@@ -139,6 +144,7 @@ On `import_account -sp car line cozy great meat pop`:
 ```
 start;
 {
+    "token": "7h89thugnt0234thg9epwotjw49hoe4y",
     "content": [],
     "errors": ["Seed phrase is incorrect"]
 }
