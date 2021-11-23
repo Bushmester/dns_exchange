@@ -13,7 +13,7 @@ Both `request` and `response` are JSON formatted strings with _start;_ at the st
 
 ## Request
 
-###Structure:
+### Structure:
 
 ```
 start;
@@ -31,7 +31,7 @@ start;
 end;
 ```
 
-###Example:
+### Example:
 
 On `account_info -a 0x2387af82 -n 3`:
 ```
@@ -55,7 +55,7 @@ end;
 
 ## Response
 
-###Structure:
+### Structure:
 
 ```
 start;
@@ -88,7 +88,7 @@ start;
 end;
 ```
 
-###Examples:
+### Examples:
 
 On `sell -tp BTC_DOGE -a 0.289 -xr 249838.36`:
 ```
@@ -279,7 +279,7 @@ Bought 0.0238 BTC (249838.36 DOGE per 1 BTC)
 Placed 0.1252 BTC buy order (249838.36 DOGE per 1 BTC)
 ```
 
-### 2. `sell` _(auth required)_
+### 3. `sell` _(auth required)_
 
 Fills all suitable for `amount` and `exchange_rate` (if specified) buy orders for the first token of the `trading_pair`, then, if the amount of bought tokens is less than the specified `amount`, places a sell order.
 
@@ -362,7 +362,7 @@ list_pairs
 No pairs found!
 ```
 
-### 3. `pair_info`
+### 4. `pair_info`
 
 Displays current buy and sell orders.
 
