@@ -2,12 +2,10 @@
 
 It is a console based cryptocurrency exchange simulation that uses sockets.
 
-# Features
-
-1. Seed phrases
-2. Hash addresses
-3. Open history of transactions and account assets info
-4. 0.1% commission for all user operations
+# Definitions
+- **Seed phrase** is a string consisting of 6 random english words. It's generated during account creation, unique for every user and can not be changed! Seed phrase is used to import an account.
+- **Hash address** is a unique string in the _0x\*\*\*\*\*\*\*\*_ format, where * can be replaced with any [a-f] or [0-9] symbol. It's generated during account creation, unique for every user and can not be changed! Hash address is used to define public account's name.
+- **To import account** is to simply log in to it with using seed phrase.
 
 # Commands
 
@@ -22,7 +20,7 @@ Example:
 create_account
 
 New account has been successfully created!
-address: 0x2387hf823u
+address: 0x2387hf82
 seed_phrase: red garden awesome run chocolate nice
 ```
 
@@ -48,7 +46,7 @@ Example:
 ```
 my_account
 
-address: 0x2387hf823u
+address: 0x2387hf82
 ```
 
 ### 4. `account_info`
@@ -63,7 +61,7 @@ Optional arguments:
 
 Example:
 ```
-account_info -a 0x2387hf823u -n 3
+account_info -a 0x2387hf82 -n 3
 
 token   amount
 BTC     3942.32
@@ -71,9 +69,9 @@ BNB     873.81
 DNS     91.073
 
 sender_address      receiver_address    token   amount
-0x2387hf823u        0x98238hgn3g        BTC     2498.298
-0x2387hf823u        0x2387hf823u        DNS     32.026
-0x2387hf823u        0x2h4982h294        BNB     224.2396
+0x2387hf82          0x98238hgn          BTC     2498.298
+0x2387hf82          0x2387hf82          DNS     32.026
+0x2387hf82          0x2h4982h2          BNB     224.2396
 ```
 
 ## Token
@@ -196,12 +194,14 @@ Example:
 ```
 pair_info -l BTC_DOGE -n 3
 
+SELL ORDERS
 exchange_rate(DOGE)   amount(BTC)
-sell orders:
 249838.36             8.872
 249838.32             3.12
 249838.31             2.0982
-buy orders:
+
+BUY ORDERS
+exchange_rate(DOGE)   amount(BTC)
 249838.27             0.24
 249838.15             13.971
 249838.03             1.739
@@ -221,7 +221,7 @@ Example:
 list_transactions -n 3
 
 sender_address      receiver_address    token   amount
-0x2387hf823u        0x98238hgn3g        BTC     2498.298
-0x2h4982h294        0x2387hf823u        DNS     32.026
-0x98238hgn3g        0x2h4982h294        BNB     224.2396
+0x2387hf82          0x98238hgn          BTC     2498.298
+0x2h4982h2          0x2387hf82          DNS     32.026
+0x98238hgn          0x2h4982h2          BNB     224.2396
 ```
