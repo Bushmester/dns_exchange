@@ -1,11 +1,149 @@
 # What is DeFinitely Not Scam Exchange?
-
 It is a console based cryptocurrency exchange simulation that uses sockets.
 
 # Definitions
 - **Seed phrase** is a string consisting of 6 random english words. It's generated during account creation, unique for every user and can not be changed! Seed phrase is used to import an account.
 - **Hash address** is a unique string in the _0x\*\*\*\*\*\*\*\*_ format, where * can be replaced with any [a-f] or [0-9] symbol. It's generated during account creation, unique for every user and can not be changed! Hash address is used to define public account's name.
 - **To import account** is to simply log in to it with using seed phrase.
+
+# Protocol
+Both `request` and `response` are JSON formatted strings with _start;_ at the start and _end;_ at the end.
+
+## Request
+
+###Structure:
+
+```
+start;
+{
+    "command": "command_name",
+    "args": [
+        {
+            "arg": "argument_1_name",
+            "val": "argument_1_value"
+        },
+        ...
+    ]
+}
+end;
+```
+
+###Example:
+
+On `account_info -a 0x2387af82 -n 3`:
+```
+start;
+{
+    "command": "account_info",
+    "args": [
+        {
+            "arg": "address",
+            "val": "0x2387af82"
+        },
+        {
+            "arg": "number",
+            "val": 3
+        }
+    ]
+}
+end;
+```
+
+## Response
+
+###Structure:
+
+```
+start;
+{
+    "content": [
+        {
+            "type": "text",
+            "lines": [
+                "Content text paragraph 1.",
+                ...
+            ]
+        },
+        {
+            "type": "table",
+            "name": "Table name",
+            "headers": ["column_1_name", ...],
+            "rows": [
+                ["Row 1, column 1 value", ...],
+                ...
+            ]
+        },
+        ...
+    ],
+    "errors": [
+        "Error message",
+        ...
+    ]
+}
+end;
+```
+
+###Examples:
+
+On `sell -tp BTC_DOGE -a 0.289 -xr 249838.36`:
+```
+start;
+{
+    "content": [
+        {
+            "type": "text",
+            "lines": [
+                "Sold 0.14 BTC (249838.39 DOGE per 1 BTC)",
+                "Sold 0.0238 BTC (249838.36 DOGE per 1 BTC)",
+                "Placed 0.1252 BTC sell order (249838.36 DOGE per 1 BTC)"
+            ]
+        }
+    ],
+    "errors": []
+}
+end;
+```
+
+On `account_info -a 0x2387af82 -n 3`:
+```
+start;
+{
+    "content": [
+        {
+            "type": "table",
+            "name": "Assets",
+            "headers": ["token", "amount"],
+            "rows": [
+                ["BTC", 3942.32],
+                ["BNB", 873.81],
+                ["DNS", 91.073]
+            ]
+        },
+        {
+            "type": "table",
+            "name": "Transaction history",
+            "headers": ["time", "from", "to", "token", "amount"],
+            "rows": [
+                ["11/22/2021, 15:44PM", "0x2387af82", "0x98b238ae", "BTC", 2498.298],
+                ["11/19/2021, 11:44AM", "0x2387af82", "0x2387af82", "DNS", 32.026],
+                ["10/01/2021, 01:23AM", "0x2387af82", "0x2c4982a2", "BNB", 224.2396]
+            ]
+        }
+    ],
+    "errors": []
+}
+end;
+```
+
+On `import_account -sp car line cozy great meat pop`:
+```
+start;
+{
+    "content": [],
+    "errors": ["Seed phrase is incorrect"]
+}
+end;
+```
 
 # Commands
 
