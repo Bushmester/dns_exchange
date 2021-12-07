@@ -1,6 +1,6 @@
 import threading
 
-from dns_exchange.dictionaries import commands_dict
+from dictionaries import commands_dict
 
 
 def register_command(func):

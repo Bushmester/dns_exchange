@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv, find_dotenv
 
-from dns_exchange.helpers import handle_client
+from helpers import handle_client
 
 
 def main():
