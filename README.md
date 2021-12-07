@@ -20,13 +20,11 @@ start;
 {
     "auth_token": "auth_token_or_empty",
     "command": "command_name",
-    "args": [
-        {
-            "arg": "argument_1_name",
-            "val": "argument_1_value"
-        },
+    "args": {
+        "argument_1_name": "argument_1_value",
+        "argument_2_name": "argument_2_value",
         ...
-    ]
+    }
 }
 end;
 ```
@@ -39,16 +37,10 @@ start;
 {
     "auth_token": "7h89thugnt0234thg9epwotjw49hoe4y",
     "command": "account_info",
-    "args": [
-        {
-            "arg": "address",
-            "val": "0x2387af82"
-        },
-        {
-            "arg": "number",
-            "val": 3
-        }
-    ]
+    "args": {
+        "address": "0x2387af82"
+        "number": 3
+    }
 }
 end;
 ```
