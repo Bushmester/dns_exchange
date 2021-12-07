@@ -1,6 +1,6 @@
 import threading
 
-from src.dictionaries import commands_dict
+from dns_exchange.dictionaries import commands_dict
 
 
 def register_command(func):
@@ -28,6 +28,7 @@ def handle_client(conn, addr):
     write_file.write('Hi client\n')
     write_file.flush()
     cmd = read_file.readline().strip()
+
     while cmd:
         result = handle_command(*cmd.split())
         if result == '':
@@ -35,4 +36,5 @@ def handle_client(conn, addr):
         write_file.write(result + '\n')
         write_file.flush()
         cmd = read_file.readline().strip()
+
     conn.close()
