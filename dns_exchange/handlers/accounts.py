@@ -5,6 +5,7 @@ from dns_exchange.validators import String
 
 # create_account command
 
+
 class CreateAccountCommandData:
     def __init__(self, *args):
         assert len(args) == 0, '"create_account" command doesn\'t take arguments'
@@ -22,7 +23,7 @@ def create_account():
                     "lines": [
                         f"address: {new_account.address}",
                         f"seed_phrase: {new_account.seed_phrase}",
-                    ]
+                    ],
                 }
             ]
         )
@@ -31,6 +32,7 @@ def create_account():
 
 
 # import_account command
+
 
 class ImportAccountCommandData:
     seed_phrase = String(predicate=lambda x: len(x.split()) >= 6)
