@@ -4,11 +4,11 @@ import re
 import socket
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Union
+from typing import Union, List
 
-from dotenv import load_dotenv, find_dotenv
-
+from dns_exchange import config
 from dns_exchange.dictionaries import commands_dict
+from dns_exchange.helpers import register_all_commands
 
 
 class Request:
@@ -31,24 +31,30 @@ class Response:
     def get_json_string(self) -> str:
         return json.dumps({"auth_token": self.auth_token, "content": self.content, "errors": self.errors})
 
+    def add_content_text(self, title: str = '', lines: List[str] = None) -> None:
+        self.content.append({
+            'type': 'text',
+            'title': title,
+            'lines': lines if lines else []
+        })
 
-def register_command(func: Callable) -> Callable:
-    commands_dict[func.__name__] = func
-    return func
+    def add_content_table(self, name: str = '', headers: List[str] = None, rows: List[List[str]] = None) -> None:
+        self.content.append({
+            'type': 'table',
+            'name': name,
+            'headers': headers if headers else [],
+            'rows': rows if rows else []
+        })
 
-
-def register_all_commands():
-    pass
+    def add_error(self, error_text: str) -> None:
+        self.errors.append(error_text)
 
 
 def handle_request(request) -> Union[Response, None]:
-    try:
-        command_func = commands_dict.get(request.command_name)
-        if command_func is None:
-            raise ValueError('Unknown command')
-        return command_func(**request.command_kwargs)
-    except StopIteration:
-        return None
+    command_func = commands_dict.get(request.command_name)
+    if command_func is None:
+        raise ValueError('Unknown command')
+    return command_func(**request.command_kwargs)
 
 
 def handle_client(conn, addr):
@@ -56,7 +62,12 @@ def handle_client(conn, addr):
 
     read_file = conn.makefile(mode='r', encoding='utf-8')
     write_file = conn.makefile(mode='w', encoding='utf-8')
-    write_file.write('You\'ve successfully connected!\n')
+
+    response = Response()
+    response.add_content_text(title='You\'ve successfully connected!')
+    response_data = response.get_json_string()
+
+    write_file.write(f'start;{response_data}end;')
     write_file.flush()
 
     client_data = read_file.readline().strip()
@@ -68,10 +79,9 @@ def handle_client(conn, addr):
             response = handle_request(request)
             response_data = response.get_json_string()
         except Exception as e:
-            response_data = Response(errors=[str(e)]).get_json_string()
-
-        if response_data is None:
-            break
+            response = Response()
+            response.add_error(str(e))
+            response_data = response.get_json_string()
 
         write_file.write(f'start;{response_data}end;' + '\n')
         write_file.flush()
@@ -82,15 +92,12 @@ def handle_client(conn, addr):
 
 
 def main():
-    load_dotenv(find_dotenv())
     register_all_commands()
-    host = os.environ.get('HOST', '0.0.0.0')
-    port = int(os.environ.get('PORT', 8080))
     print(f'Started process with PID={os.getpid()}')
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind((host, port))
+        s.bind((config.HOST, config.PORT))
         s.listen(5)
 
         with ThreadPoolExecutor(max_workers=2) as executor:
