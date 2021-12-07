@@ -1,3 +1,4 @@
+from dns_exchange.services.Account import Account
 from dns_exchange.validators import String
 
 
@@ -8,9 +9,9 @@ class CreateAccountCommandData:
         assert len(args) == 0, '"create_account" command doesn\'t take arguments'
 
 
-def create_account(*args):
-    data = CreateAccountCommandData(*args)
-    # TODO: create_account command logic
+def create_account():
+    CreateAccountCommandData()
+    return Account()
 
 
 # import_account command

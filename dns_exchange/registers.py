@@ -1,4 +1,3 @@
-from dns_exchange.handlers.test import echo
 from dns_exchange.helpers import register_command
 
 
