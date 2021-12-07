@@ -3,15 +3,17 @@ import socket
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
-import dictionaries
+from dotenv import load_dotenv, find_dotenv
+
 # No inspection is added because these imports register command functions
 # noinspection PyUnresolvedReferences
-from handlers import get_value, set_value, bye
+from commands import get_value, set_value, bye
+from src.dictionaries import commands_dict
 
 
 def handle_command(cmd, *args):
     try:
-        command_func = dictionaries.commands_dict.get(cmd)
+        command_func = commands_dict.get(cmd)
         if command_func is None:
             raise ValueError('Unknown command')
         result = command_func(*args)
@@ -40,8 +42,9 @@ def handle_client(conn, addr):
 
 
 def main():
-    host = '0.0.0.0'
-    port = 8080
+    load_dotenv(find_dotenv())
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('PORT', 8080))
     print(f'Started process with PID={os.getpid()}')
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

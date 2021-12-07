@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 
 
-#  Source code: https://docs.python.org/3/howto/descriptor.html#complete-practical-example
-
-
 class Validator(ABC):
     def __set_name__(self, owner, name):
         self.private_name = '_' + name
@@ -41,13 +38,9 @@ class Number(Validator):
         except ValueError:
             raise TypeError(f'Expected {value!r} to be an int or float')
         if self.minvalue is not None and value < self.minvalue:
-            raise ValueError(
-                f'Expected {value!r} to be at least {self.minvalue!r}'
-            )
+            raise ValueError(f'Expected {value!r} to be at least {self.minvalue!r}')
         if self.maxvalue is not None and value > self.maxvalue:
-            raise ValueError(
-                f'Expected {value!r} to be no more than {self.maxvalue!r}'
-            )
+            raise ValueError(f'Expected {value!r} to be no more than {self.maxvalue!r}')
         return value
 
 
@@ -61,15 +54,9 @@ class String(Validator):
         if not isinstance(value, str):
             raise TypeError(f'Expected {value!r} to be an str')
         if self.minsize is not None and len(value) < self.minsize:
-            raise ValueError(
-                f'Expected {value!r} to be no smaller than {self.minsize!r}'
-            )
+            raise ValueError(f'Expected {value!r} to be no smaller than {self.minsize!r}')
         if self.maxsize is not None and len(value) > self.maxsize:
-            raise ValueError(
-                f'Expected {value!r} to be no bigger than {self.maxsize!r}'
-            )
+            raise ValueError(f'Expected {value!r} to be no bigger than {self.maxsize!r}')
         if self.predicate is not None and not self.predicate(value):
-            raise ValueError(
-                f'Expected {self.predicate} to be true for {value!r}'
-            )
+            raise ValueError(f'Expected {self.predicate} to be true for {value!r}')
         return value
