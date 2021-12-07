@@ -1,4 +1,4 @@
-from dns_exchange.db_models.interfaces.User import UserInterface
+from dns_exchange.db_models.interfaces.UserInterface import UserInterface
 
 
 class User(UserInterface):

@@ -1,4 +1,5 @@
 from dns_exchange.services.Account import Account
+from dns_exchange.services.response import Response
 from dns_exchange.validators import String
 
 
@@ -11,7 +12,22 @@ class CreateAccountCommandData:
 
 def create_account():
     CreateAccountCommandData()
-    return Account()
+    try:
+        new_account = Account()
+        return Response(
+            content=[
+                {
+                    "type": "text",
+                    "title": "New account has been successfully created!",
+                    "lines": [
+                        f"address: {new_account.address}",
+                        f"seed_phrase: {new_account.seed_phrase}",
+                    ]
+                }
+            ]
+        )
+    except Exception as e:
+        return Response(errors=[str(e)])
 
 
 # import_account command
@@ -26,4 +42,7 @@ class ImportAccountCommandData:
 
 def import_account(*args):
     data = ImportAccountCommandData(*args)
-    # TODO: import_account command logic
+    try:
+        account = Account.get_by_seed_phrase(data.seed_phrase)
+    except Exception as e:
+        return Response(errors=[str(e)])

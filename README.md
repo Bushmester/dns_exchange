@@ -64,6 +64,7 @@ start;
     "content": [
         {
             "type": "text",
+            "title": "Text title"
             "lines": [
                 "Content text paragraph 1.",
                 ...
@@ -98,6 +99,7 @@ start;
     "content": [
         {
             "type": "text",
+            "title": "",
             "lines": [
                 "Sold 0.14 BTC (249838.39 DOGE per 1 BTC)",
                 "Sold 0.0238 BTC (249838.36 DOGE per 1 BTC)",
