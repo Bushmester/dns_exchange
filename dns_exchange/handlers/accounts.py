@@ -7,8 +7,8 @@ from dns_exchange.validators import String, Number, Address, Pair
 
 
 class CreateAccountCommandData:
-    def __init__(self, *args):
-        assert len(args) == 0, '"create_account" command doesn\'t take arguments'
+    def __init__(self, **kwargs):
+        assert len(kwargs) == 0, '"create_account" command doesn\'t take arguments'
 
 
 def create_account():
@@ -33,13 +33,13 @@ def create_account():
 class ImportAccountCommandData:
     seed_phrase = String(predicate=lambda x: len(x.split()) >= 6)
 
-    def __init__(self, *args):
-        assert len(args) == 1, '"import_account" command takes exactly 1 argument'
-        self.seed_phrase = args[0]
+    def __init__(self, **kwargs):
+        assert len(kwargs) == 1, '"import_account" command takes exactly 1 argument'
+        self.seed_phrase = kwargs['seed_phrase']
 
 
-def import_account(*args):
-    data = ImportAccountCommandData(*args)
+def import_account(**kwargs):
+    data = ImportAccountCommandData(**kwargs)
 
     # TODO: Import account logic
 
