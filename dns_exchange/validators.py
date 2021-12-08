@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import re
 
 
 class Validator(ABC):
@@ -63,4 +64,36 @@ class String(Validator):
             )
         if self.predicate is not None and not self.predicate(value):
             raise ValueError(f"Expected {self.predicate} to be true for {value!r}")
+        return value
+
+
+class Address(Validator):
+    def __init__(self):
+        pass
+
+    def validate(self, value):
+        if not isinstance(value, str):
+            raise TypeError(f"Expected {value!r} to be an str")
+
+        pattern = r'0x([a-f0-9]{8})'
+
+        if not re.fullmatch(pattern=pattern, string=value):
+            raise ValueError("address in incorrect!")
+
+        return value
+
+
+class Pair(Validator):
+    def __init__(self):
+        pass
+
+    def validate(self, value):
+        if not isinstance(value, str):
+            raise TypeError(f"Expected {value!r} to be an str")
+
+        pattern = r'[a-z]{3,4}_[a-z]{3,4}'
+
+        if not re.fullmatch(pattern=pattern, string=value):
+            raise ValueError('pair in incorrect!')
+
         return value
