@@ -1,1 +1,2 @@
 commands_dict = {}
+db = {}
