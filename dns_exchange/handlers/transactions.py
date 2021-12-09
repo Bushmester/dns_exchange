@@ -3,8 +3,6 @@ from dns_exchange.validators import Number
 
 
 # list_transactions command
-
-
 class ListTransactionsCommandData:
     number = Number(minvalue=1, maxvalue=50)
 
@@ -15,7 +13,5 @@ class ListTransactionsCommandData:
 
 def list_transactions(**kwargs):
     data = ListTransactionsCommandData(**kwargs)
-
-    # TODO: list_pair logic
-
+    # TODO: List transactions logic
     return Response()

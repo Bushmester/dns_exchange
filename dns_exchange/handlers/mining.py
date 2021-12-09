@@ -3,7 +3,6 @@ from dns_exchange.validators import Number
 
 
 # mine command
-
 class MineCommandData:
     number = Number(minvalue=1, maxvalue=50)
 
@@ -14,7 +13,5 @@ class MineCommandData:
 
 def mine(**kwargs):
     data = MineCommandData(**kwargs)
-
-    # TODO: mine_command logic
-
+    # TODO: Mine logic
     return Response()

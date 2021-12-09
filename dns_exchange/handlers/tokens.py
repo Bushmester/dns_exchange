@@ -3,8 +3,6 @@ from dns_exchange.validators import String, Number
 
 
 # add_token command
-
-
 class AddTokenCommandData:
     tag = String(minsize=3, maxsize=4)
     quantity = Number(minvalue=0)
@@ -19,15 +17,11 @@ class AddTokenCommandData:
 
 def add_token(**kwargs):
     data = AddTokenCommandData(**kwargs)
-
     # TODO: Add token logic
-
     return Response()
 
 
 # buy command
-
-
 class BuyCommandData:
     trading_pair = String(minsize=3, maxsize=4)
     amount = Number(minvalue=0)
@@ -46,15 +40,11 @@ class BuyCommandData:
 
 def buy(**kwargs):
     data = BuyCommandData(**kwargs)
-
     # TODO: Buy logic
-
     return Response()
 
 
 # sell command
-
-
 class SellCommandData:
     trading_pair = String(minsize=3, maxsize=4)
     amount = Number(minvalue=0)
@@ -73,7 +63,5 @@ class SellCommandData:
 
 def sell(**kwargs):
     data = SellCommandData(**kwargs)
-
     # TODO: Sell logic
-
     return Response()

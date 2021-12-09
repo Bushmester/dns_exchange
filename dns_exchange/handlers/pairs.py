@@ -3,7 +3,6 @@ from dns_exchange.validators import String, Number
 
 
 # add_pair command
-
 class AddPairCommandData:
     token1 = String(minsize=3, maxsize=4)
     token2 = String(minsize=3, maxsize=4)
@@ -18,15 +17,11 @@ class AddPairCommandData:
 
 def add_pair(**kwargs):
     data = AddPairCommandData(**kwargs)
-
     # TODO: Add pair logic
-
     return Response()
 
 
 # delete_pair command
-
-
 class DeletePairCommandData:
     label = String(pattern=r'[a-z]{3,4}_[a-z]{3,4}')
 
@@ -37,15 +32,11 @@ class DeletePairCommandData:
 
 def delete_pair(**kwargs):
     data = DeletePairCommandData(**kwargs)
-
     # TODO: Delete pair logic
-
     return Response()
 
 
 # list_pairs command
-
-
 class ListPairsCommandData:
     filter_by_label = String()
 
@@ -56,14 +47,11 @@ class ListPairsCommandData:
 
 def list_pair(**kwargs):
     data = ListPairsCommandData(**kwargs)
-
     # TODO: List pairs logic
-
     return Response()
 
 
 # pair_info command
-
 class PairInfoCommandData:
     label = String(pattern=r'[a-z]{3,4}_[a-z]{3,4}')
     number = Number(minvalue=1, maxvalue=50)
@@ -78,7 +66,5 @@ class PairInfoCommandData:
 
 def pair_info(**kwargs):
     data = PairInfoCommandData(**kwargs)
-
-    # TODO: Pair info logicF
-
+    # TODO: Pair info logic
     return Response()
