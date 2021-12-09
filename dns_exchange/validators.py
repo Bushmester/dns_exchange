@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import re
 
 
 class Validator(ABC):
@@ -45,10 +46,11 @@ class Number(Validator):
 
 
 class String(Validator):
-    def __init__(self, minsize=None, maxsize=None, predicate=None):
+    def __init__(self, minsize=None, maxsize=None, predicate=None, pattern=None):
         self.minsize = minsize
         self.maxsize = maxsize
         self.predicate = predicate
+        self.pattern = pattern
 
     def validate(self, value):
         if not isinstance(value, str):
@@ -63,4 +65,7 @@ class String(Validator):
             )
         if self.predicate is not None and not self.predicate(value):
             raise ValueError(f"Expected {self.predicate} to be true for {value!r}")
+
+        if self.pattern and not re.fullmatch(pattern=self.pattern, string=value):
+            raise ValueError("invalid format!")
         return value
