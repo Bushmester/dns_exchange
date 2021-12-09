@@ -1,4 +1,4 @@
-from dns_exchange.db_models.redis.User import User
+from dns_exchange.db_models.in_memory.User import User
 
 
 class Account:

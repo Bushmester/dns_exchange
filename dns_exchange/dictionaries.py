@@ -1,2 +1,2 @@
 commands_dict = {}
-db = {}
+db = {'users': []}
