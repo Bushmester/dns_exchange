@@ -11,8 +11,9 @@ class AddTokenCommandData:
 
     def __init__(self, **kwargs):
         assert 'tag' in kwargs.keys(), 'command "add_token" requires argument "tag"'
-        assert 'quantity' in kwargs.keys(), 'command "add_token" requires argument "quantity"'
         self.tag = kwargs['tag']
+
+        assert 'quantity' in kwargs.keys(), 'command "add_token" requires argument "quantity"'
         self.quantity = kwargs['quantity']
 
 
@@ -34,8 +35,9 @@ class BuyCommandData:
 
     def __init__(self, **kwargs):
         assert 'trading_pair' in kwargs.keys(), 'command "buy" requires argument "trading_pair"'
-        assert 'amount' in kwargs.keys(), 'command "buy" requires argument "amount"'
         self.trading_pair = kwargs['trading_pair']
+
+        assert 'amount' in kwargs.keys(), 'command "buy" requires argument "amount"'
         self.amount = kwargs['amount']
 
         if 'exchange_rate' in kwargs.keys():
@@ -60,8 +62,9 @@ class SellCommandData:
 
     def __init__(self, **kwargs):
         assert 'trading_pair' in kwargs.keys(), 'command "sell" requires argument "trading_pair"'
-        assert 'amount' in kwargs.keys(), 'command "sell" requires argument "amount"'
         self.trading_pair = kwargs['trading_pair']
+        
+        assert 'amount' in kwargs.keys(), 'command "sell" requires argument "amount"'
         self.amount = kwargs['amount']
 
         if 'exchange_rate' in kwargs.keys():

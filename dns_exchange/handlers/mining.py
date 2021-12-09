@@ -8,7 +8,6 @@ class MineCommandData:
     number = Number(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) == 1, '"mine" command takes exactly 1 arguments'
         assert 'number' in kwargs.keys(), 'command "mine" requires argument "number"'
         self.number = kwargs['number']
 

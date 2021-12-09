@@ -40,12 +40,12 @@ def import_account(**kwargs):
     return Response()
 
 
-# my_account command®
+# my_account command
 
 
 def my_account(**kwargs):
 
-    # TODO: Import my_account
+    # TODO: My account logic
 
     return Response()
 
@@ -54,9 +54,7 @@ def my_account(**kwargs):
 
 
 class AccountsInfoCommandData:
-    address_pattern = r'0x([a-f0-9]{8})'
-
-    address = String(pattern=address_pattern)
+    address = String(pattern=r'0x([a-f0-9]{8})')
     number = Number(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):

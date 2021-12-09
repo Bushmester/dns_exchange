@@ -10,8 +10,9 @@ class AddPairCommandData:
 
     def __init__(self, **kwargs):
         assert 'token1' in kwargs.keys(), 'command "add_pair" requires argument "token1"'
-        assert 'token2' in kwargs.keys(), 'command "add_pair" requires argument "token2"'
         self.token1 = kwargs['token1']
+
+        assert 'token2' in kwargs.keys(), 'command "add_pair" requires argument "token2"'
         self.token2 = kwargs['token2']
 
 
@@ -27,9 +28,7 @@ def add_pair(**kwargs):
 
 
 class DeletePairCommandData:
-    pair_pattern = r'[a-z]{3,4}_[a-z]{3,4}'
-
-    label = String(pattern=pair_pattern)
+    label = String(pattern=r'[a-z]{3,4}_[a-z]{3,4}')
 
     def __init__(self, **kwargs):
         assert 'label' in kwargs.keys(), 'command "delete_pair" requires argument "label"'
@@ -66,9 +65,7 @@ def list_pair(**kwargs):
 # pair_info command
 
 class PairInfoCommandData:
-    pair_pattern = r'[a-z]{3,4}_[a-z]{3,4}'
-
-    label = String(pattern=pair_pattern)
+    label = String(pattern=r'[a-z]{3,4}_[a-z]{3,4}')
     number = Number(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
