@@ -6,13 +6,7 @@ from dns_exchange.validators import String, Number
 # create_account command
 
 
-class CreateAccountCommandData:
-    def __init__(self, **kwargs):
-        assert len(kwargs) == 0, '"create_account" command doesn\'t take arguments'
-
-
 def create_account():
-    CreateAccountCommandData()
 
     new_account = Account()
 
@@ -34,7 +28,7 @@ class ImportAccountCommandData:
     seed_phrase = String(predicate=lambda x: len(x.split()) >= 6)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) == 1, '"import_account" command takes exactly 1 argument'
+        assert 'seed_phrase' in kwargs.keys(), 'command "import_account" requires argument "seed_phrase"'
         self.seed_phrase = kwargs['seed_phrase']
 
 
@@ -49,13 +43,7 @@ def import_account(**kwargs):
 # my_account command®
 
 
-class MyAccountCommandData:
-    def __init__(self, **kwargs):
-        assert len(kwargs) == 0
-
-
 def my_account(**kwargs):
-    data = MyAccountCommandData(**kwargs), '"my_account" command doesn\'t take arguments'
 
     # TODO: Import my_account
 
@@ -72,10 +60,10 @@ class AccountsInfoCommandData:
     number = Number(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) in (1, 2), '"account_info" command takes minimum 1 and maximum 2 arguments'
+        assert 'address' in kwargs.keys(), 'command "account_info" requires argument "address"'
         self.address = kwargs['address']
 
-        if len(kwargs) == 2:
+        if 'number' in kwargs.keys():
             self.number = kwargs['number']
 
 

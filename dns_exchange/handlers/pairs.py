@@ -9,7 +9,8 @@ class AddPairCommandData:
     token2 = String(minsize=3, maxsize=4)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) == 2, '"add_pair" command takes exactly 2 arguments'
+        assert 'token1' in kwargs.keys(), 'command "add_pair" requires argument "token1"'
+        assert 'token2' in kwargs.keys(), 'command "add_pair" requires argument "token2"'
         self.token1 = kwargs['token1']
         self.token2 = kwargs['token2']
 
@@ -31,7 +32,7 @@ class DeletePairCommandData:
     label = String(pattern=pair_pattern)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) == 1, '"delete_pair" command takes exactly 1 argument'
+        assert 'label' in kwargs.keys(), 'command "delete_pair" requires argument "label"'
         self.label = kwargs['label']
 
 
@@ -50,9 +51,7 @@ class ListPairsCommandData:
     filter_by_label = String()
 
     def __init__(self, **kwargs):
-        assert len(kwargs) < 2, '"list_pairs" takes maximum 1 argument'
-
-        if len(kwargs) == 1:
+        if 'filter_by_label' in kwargs.keys():
             self.filter_by_label = kwargs['filter_by_label']
 
 
@@ -73,10 +72,10 @@ class PairInfoCommandData:
     number = Number(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) != 0 and len(kwargs) <= 2, '"pair_info" command takes minimum 1 and maximum 2 arguments'
+        assert 'label' in kwargs.keys(), 'command "pair_info" requires argument "label"'
         self.label = kwargs['label']
 
-        if len(kwargs) == 2:
+        if 'number' in kwargs:
             self.number = kwargs['number']
 
 

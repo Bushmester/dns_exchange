@@ -10,7 +10,8 @@ class AddTokenCommandData:
     quantity = Number(minvalue=0)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) == 2, '"add_token" command takes exactly 2 arguments'
+        assert 'tag' in kwargs.keys(), 'command "add_token" requires argument "tag"'
+        assert 'quantity' in kwargs.keys(), 'command "add_token" requires argument "quantity"'
         self.tag = kwargs['tag']
         self.quantity = kwargs['quantity']
 
@@ -32,11 +33,12 @@ class BuyCommandData:
     exchange_rate = Number(minvalue=0)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) == 2, '"buy" command takes minimum 2 and maximum 3 arguments'
+        assert 'trading_pair' in kwargs.keys(), 'command "buy" requires argument "trading_pair"'
+        assert 'amount' in kwargs.keys(), 'command "buy" requires argument "amount"'
         self.trading_pair = kwargs['trading_pair']
         self.amount = kwargs['amount']
 
-        if len(kwargs) > 2:
+        if 'exchange_rate' in kwargs.keys():
             self.exchange_rate = kwargs['exchange_rate']
 
 
@@ -57,11 +59,12 @@ class SellCommandData:
     exchange_rate = Number(minvalue=0)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) == 2, '"sell" command takes exactly 2 arguments'
+        assert 'trading_pair' in kwargs.keys(), 'command "sell" requires argument "trading_pair"'
+        assert 'amount' in kwargs.keys(), 'command "sell" requires argument "amount"'
         self.trading_pair = kwargs['trading_pair']
         self.amount = kwargs['amount']
 
-        if len(kwargs) > 2:
+        if 'exchange_rate' in kwargs.keys():
             self.exchange_rate = kwargs['exchange_rate']
 
 

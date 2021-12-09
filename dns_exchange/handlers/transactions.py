@@ -9,9 +9,7 @@ class ListTransactionsCommandData:
     number = Number(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
-        assert len(kwargs) == 0 and len(kwargs) <= 1, '"list_transactions" command takes' \
-                                                      ' minimum 0 and maximum 1 arguments'
-        if len(kwargs) == 1:
+        if 'number' in kwargs.keys():
             self.number = kwargs['number']
 
 

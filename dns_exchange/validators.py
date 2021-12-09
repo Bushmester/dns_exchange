@@ -69,19 +69,3 @@ class String(Validator):
         if self.pattern and not re.fullmatch(pattern=self.pattern, string=value):
             raise ValueError("invalid format!")
         return value
-
-
-class Pair(Validator):
-    def __init__(self):
-        pass
-
-    def validate(self, value):
-        if not isinstance(value, str):
-            raise TypeError(f"Expected {value!r} to be an str")
-
-        pattern = r'[a-z]{3,4}_[a-z]{3,4}'
-
-        if not re.fullmatch(pattern=pattern, string=value):
-            raise ValueError('pair in incorrect!')
-
-        return value
