@@ -1,6 +1,6 @@
 from typing import Any
 
-from dns_exchange.db_models.interfaces.users import UserAssetsInterface, UserInterface
+from dns_exchange.models.interfaces.users import UserAssetsInterface, UserInterface
 from dns_exchange.dictionaries import db
 
 
