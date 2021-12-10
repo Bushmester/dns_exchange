@@ -4,14 +4,6 @@ from dns_exchange.models.interfaces.users import UserAssetsInterface, UserInterf
 from dns_exchange.dictionaries import db
 
 
-def get_index():
-    if hasattr(get_index, 'index'):
-        get_index.index += 1
-    else:
-        get_index.index = 0
-    return get_index.index
-
-
 class UserAssets(UserAssetsInterface):
     @staticmethod
     def _set_value_by_user_id(user_id: int, value: Any):
@@ -23,10 +15,6 @@ class UserAssets(UserAssetsInterface):
 
 
 class User(UserInterface):
-    @staticmethod
-    def _generate_id():
-        return get_index()
-
     @staticmethod
     def _get_assets_descriptor_obj():
         return UserAssets()

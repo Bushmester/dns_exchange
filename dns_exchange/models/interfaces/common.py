@@ -59,12 +59,6 @@ class BaseModelInterface(ABC):
         self._delete_by_id(self.id)
 
     """Methods that make interface work"""
-
-    @staticmethod
-    @abstractmethod
-    def _generate_id():
-        pass
-
     @staticmethod
     @abstractmethod
     def _create_obj(**kwargs):
