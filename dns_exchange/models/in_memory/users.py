@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from dns_exchange.models.interfaces.users import UserAssetsInterface, UserInterface
 from dns_exchange.dictionaries import db
@@ -6,11 +7,11 @@ from dns_exchange.dictionaries import db
 
 class UserAssets(UserAssetsInterface):
     @staticmethod
-    def _set_value_by_user_id(user_id: int, value: Any):
+    def _set_value_by_user_id(user_id: UUID, value: Any):
         list(filter(lambda x: x['id'] == user_id, db[User.table_name]))[0][UserAssets.field_name] = value
 
     @staticmethod
-    def _get_value_by_user_id(user_id: int):
+    def _get_value_by_user_id(user_id: UUID):
         return list(filter(lambda x: x['id'] == user_id, db[User.table_name]))[0][UserAssets.field_name]
 
 
@@ -38,10 +39,10 @@ class User(UserInterface):
         return list(filter(filter_func, db[User.table_name]))
 
     @staticmethod
-    def _update_by_id(obj_id: int, field_name: str, value: Any):
+    def _update_by_id(obj_id: UUID, field_name: str, value: Any):
         list(filter(lambda x: x['id'] == obj_id, db[User.table_name]))[0][field_name] = value
 
     @staticmethod
-    def _delete_by_id(obj_id: int):
+    def _delete_by_id(obj_id: UUID):
         index = db[User.table_name].index(list(filter(lambda x: x['id'] == obj_id, db[User.table_name]))[0])
         del db[User.table_name][index]
