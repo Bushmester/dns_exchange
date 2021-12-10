@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 from uuid import UUID, uuid4
+from bson.objectid import ObjectId
 
 
 class BaseDescriptorInterface(ABC):
@@ -35,7 +36,7 @@ class BaseModelInterface(ABC):
 
     # Create method
     def __init__(self, **kwargs):
-        obj_id = uuid4()
+        obj_id = ObjectId()
         self._create_obj(id=obj_id, **kwargs)
 
         self.id = obj_id
@@ -77,10 +78,10 @@ class BaseModelInterface(ABC):
 
     @staticmethod
     @abstractmethod
-    def _update_by_id(obj_id: UUID, field_name: str, new_value: Any):
+    def _update_by_id(obj_id: ObjectId, field_name: str, new_value: Any):
         pass
 
     @staticmethod
     @abstractmethod
-    def _delete_by_id(obj_id: UUID):
+    def _delete_by_id(obj_id: ObjectId):
         pass
