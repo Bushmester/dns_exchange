@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from dns_exchange.db_models.interfaces.common import BaseModelInterface, BaseDescriptorInterface
+from dns_exchange.models.interfaces.common import BaseModelInterface, BaseDescriptorInterface
 
 
 class UserAssetsInterface(BaseDescriptorInterface, ABC):
