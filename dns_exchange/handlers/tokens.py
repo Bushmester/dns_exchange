@@ -53,7 +53,7 @@ class SellCommandData:
     def __init__(self, **kwargs):
         assert 'trading_pair' in kwargs.keys(), 'command "sell" requires argument "trading_pair"'
         self.trading_pair = kwargs['trading_pair']
-        
+
         assert 'amount' in kwargs.keys(), 'command "sell" requires argument "amount"'
         self.amount = kwargs['amount']
 

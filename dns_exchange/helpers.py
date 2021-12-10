@@ -29,13 +29,9 @@ class Response:
         )
 
     def add_content_text(self, title: str = "", lines: List[str] = None) -> None:
-        self.content.append(
-            {"type": "text", "title": title, "lines": lines if lines else []}
-        )
+        self.content.append({"type": "text", "title": title, "lines": lines if lines else []})
 
-    def add_content_table(
-        self, name: str = "", headers: List[str] = None, rows: List[List[str]] = None
-    ) -> None:
+    def add_content_table(self, name: str = "", headers: List[str] = None, rows: List[List[str]] = None) -> None:
         self.content.append(
             {
                 "type": "table",

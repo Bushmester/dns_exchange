@@ -9,10 +9,7 @@ def create_account():
     response = Response()
     response.add_content_text(
         title="New account has been successfully created!",
-        lines=[
-            f"address: {new_account.address}",
-            f"seed_phrase: {new_account.seed_phrase}"
-        ]
+        lines=[f"address: {new_account.address}", f"seed_phrase: {new_account.seed_phrase}"],
     )
     return response
 

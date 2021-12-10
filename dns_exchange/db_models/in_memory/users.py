@@ -1,6 +1,6 @@
 from typing import Any
 
-from dns_exchange.db_models.interfaces.UserInterface import UserAssetsInterface, UserInterface
+from dns_exchange.db_models.interfaces.users import UserAssetsInterface, UserInterface
 from dns_exchange.dictionaries import db
 
 
@@ -46,6 +46,7 @@ class User(UserInterface):
                 if not obj[kwarg[0]] == kwarg[1]:
                     return False
             return True
+
         return list(filter(filter_func, db[User.table_name]))
 
     @staticmethod
