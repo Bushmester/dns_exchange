@@ -76,5 +76,5 @@ if __name__ == "__main__":
     # main()
 
     user = User.retrieve(id='61b4e669135ff8f08163d3cc')
-    for key, val in user.assets:
-        print(key, val)
+    user.address = 'Ilnar'
+    user.save()

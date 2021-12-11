@@ -10,7 +10,7 @@ class UserAssets:
     field_name = 'assets'
 
     def __init__(self, owner_id):
-        self.owner_id = owner_id
+        self._owner_id = owner_id
         self._assets_to_save = {}
 
     """Interface to work with"""
@@ -32,51 +32,69 @@ class UserAssets:
     """Methods that make interface work"""
 
     def _set_value(self, key: str, value: Any):
-        db[User.table_name].update_one({'id': self.owner_id.id}, {'$set': {f'{UserAssets.field_name}.{key}': value}})
+        db[User.table_name].update_one({'id': self._owner_id.id}, {'$set': {f'{UserAssets.field_name}.{key}': value}})
 
     def _get_value(self, key: str):
-        return db[User.table_name].find_one({'id': self.owner_id.id})[UserAssets.field_name][key]
+        return db[User.table_name].find_one({'id': self._owner_id.id})[UserAssets.field_name][key]
 
     def _delete_value(self, key: str):
-        db[User.table_name].update_one({'id': self.owner_id.id}, {'$unset': {f'{UserAssets.field_name}.{key}': None}})
+        db[User.table_name].update_one({'id': self._owner_id.id}, {'$unset': {f'{UserAssets.field_name}.{key}': None}})
 
 
 class User:
-    # Attributes below must be specified by ModelInterface
     table_name = 'users'
-    # __slots__ = ('id', 'address', 'seed_phrase', 'is_admin', 'assets')
+    descriptor_attrs = ('assets',)
 
-    fields_to_change = ('id', 'address', 'seed_phrase')
-
-    def __init__(self, id=None, address=None, seed_phrase=None, is_new=None, **kwargs):
+    def __init__(self, obj_id, is_new, **kwargs):
+        self._id = obj_id
         self._is_new = is_new
+        self._attrs_to_save = {**kwargs}
 
-        self.id = id if id else str(ObjectId())
-        self.address = address if address else get_address()
-        self.seed_phrase = seed_phrase if seed_phrase else get_seed_phrase()
+        self._assets = UserAssets(self)
 
-        self.is_admin = False
-        self.assets = UserAssets(self)
+    @staticmethod
+    def get_default_kwargs(**kwargs):
+        return {
+            'id': str(ObjectId()),
+            'address': get_address(),
+            'seed_phrase': get_seed_phrase(),
+            'is_admin': False,
+            **kwargs
+        }
 
     """Interface to work with"""
 
     @classmethod
     def create(cls, **kwargs):
-        return cls(**kwargs, is_new=True)
+        default_kwargs = cls.get_default_kwargs(**kwargs)
+        odj_id = default_kwargs.pop('id')
+        return cls(cls.get_default_kwargs(**kwargs), obj_id=odj_id, is_new=True)
 
     @classmethod
     def retrieve(cls, **kwargs):
-        obj_data = cls._retrieve_obj(**kwargs)
-        return cls(**obj_data, is_new=False)
+        obj_id = kwargs['id'] if 'id' in kwargs.keys() else cls._retrieve_obj(**kwargs)['id']
+        return cls(obj_id=obj_id, is_new=False)
+
+    def __getattr__(self, key):
+        if key in self.descriptor_attrs:
+            getattr(self, f'_{key}')
+        return self._get_obj_attr(key)
+
+    def __setattr__(self, key, value):
+        if key in self.descriptor_attrs:
+            raise AttributeError('You can\'t set this attribute explicitly')
+        if key[0] == '_':
+            super().__setattr__(key, value)
+        else:
+            self._attrs_to_save[key] = value
 
     def save(self):
-        kwargs = {key: getattr(self, key) for key in self.fields_to_change}
         if self._is_new:
-            self._create_obj(**kwargs)
+            self._create_obj(**self._attrs_to_save)
             self._is_new = False
         else:
-            self._update_obj(**kwargs)
-        self.assets.save()
+            self._update_obj(**self._attrs_to_save)
+        self._assets.save()
 
     def delete(self):
         self._delete_obj()
@@ -89,15 +107,18 @@ class User:
         db[User.table_name].insert_one({key: val for key, val in kwargs.items()})
 
     def _update_obj(self, **kwargs):
-        db[User.table_name].update_one({'id': self.id}, {'$set': {key: val} for key, val in kwargs.items()})
+        db[User.table_name].update_one({'id': self._id}, {'$set': {key: val} for key, val in kwargs.items()})
 
     @classmethod
     def _retrieve_obj(cls, **kwargs) -> dict:
         return db[User.table_name].find_one({key: val for key, val in kwargs.items()})
+
+    def _get_obj_attr(self, key) -> Any:
+        return db[User.table_name].find_one({'id': self._id})[key]
 
     @classmethod
     def _list_objs(cls, **kwargs) -> List[dict]:
         pass
 
     def _delete_obj(self):
-        db[User.table_name].delete_one({'id': self.id})
+        db[User.table_name].delete_one({'id': self._id})
