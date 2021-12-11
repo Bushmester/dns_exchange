@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Any
-from uuid import UUID, uuid4
 from bson.objectid import ObjectId
 
 
@@ -9,44 +8,64 @@ class BaseDescriptorInterface(ABC):
 
     """Interface to work with"""
 
-    def __set__(self, instance, value):
-        self._set_value_by_user_id(instance.id, value)
+    def __init__(self, owner_id):
+        self.owner_id = owner_id
 
-    def __get__(self, instance, owner):
-        return self._get_value_by_user_id(instance.id)
+    def __setitem__(self, key, value):
+        self._set_value(key, value)
+
+    def __getitem__(self, key):
+        return self._get_value(key)
+
+    def __delitem__(self, key):
+        self._delete_value(key)
 
     """Methods that make interface work"""
 
-    @staticmethod
     @abstractmethod
-    def _set_value_by_user_id(user_id: UUID, value: Any):
+    def _set_value(self, key: str, value: Any):
         pass
 
-    @staticmethod
     @abstractmethod
-    def _get_value_by_user_id(user_id: UUID):
+    def _get_value(self, key: str):
+        pass
+
+    @abstractmethod
+    def _delete_value(self, key: str):
         pass
 
 
 class BaseModelInterface(ABC):
-    table_name = ''  # Must be specified by ModelInterface (e.g. "users" for UserInterface)
-    __slots__ = ('id',)
+    # Attributes below must be specified by ModelInterface
+    table_name = ''
+    _predefined_attrs = ('id',)
+    __slots__ = (*_predefined_attrs,)
 
     """Interface to work with"""
 
-    # Create method
     def __init__(self, **kwargs):
-        obj_id = ObjectId()
-        self._create_obj(id=obj_id, **kwargs)
+        self.id = ObjectId()
 
-        self.id = obj_id
+        self._create_obj(**kwargs)
 
-    # Update method
-    def __setattr__(self, item, value):
-        super().__setattr__(item, value)
-        self._update_by_id(self.id, item, value)
+    def __setattr__(self, key, value):
+        if key in self._predefined_attrs:
+            super().__setattr__(key, value)
+        else:
+            self._set_obj_attr(key, value)
 
-    # Retrieve method
+    def __getattr__(self, key):
+        if key in self._predefined_attrs:
+            return super.__getattribute__(self, key)
+        else:
+            self._get_obj_attr(key)
+
+    def __delattr__(self, key):
+        if key in self._predefined_attrs:
+            return super.__delattr__(self, key)
+        else:
+            self._del_obj_attr(key)
+
     @classmethod
     def retrieve(cls, **kwargs):
         return cls._retrieve_obj(**kwargs)
@@ -54,34 +73,37 @@ class BaseModelInterface(ABC):
     # List method
     @classmethod
     def list(cls, **kwargs):
-        return cls._list_obj(**kwargs)
+        return cls._list_objs(**kwargs)
 
     # Delete method
     def __del__(self):
-        self._delete_by_id(self.id)
+        self._delete_obj()
 
     """Methods that make interface work"""
-    @staticmethod
+
     @abstractmethod
-    def _create_obj(**kwargs):
+    def _create_obj(self, **kwargs):
         pass
 
-    @staticmethod
     @abstractmethod
-    def _retrieve_obj(**kwargs):
+    def _set_obj_attr(self, key: str, value: Any):
         pass
 
-    @staticmethod
     @abstractmethod
-    def _list_obj(**kwargs):
+    def _get_obj_attr(self, key: str):
         pass
 
-    @staticmethod
     @abstractmethod
-    def _update_by_id(obj_id: ObjectId, field_name: str, new_value: Any):
+    def _del_obj_attr(self, key: str):
         pass
 
-    @staticmethod
-    @abstractmethod
-    def _delete_by_id(obj_id: ObjectId):
+    @classmethod
+    def _retrieve_obj(cls, **kwargs):
+        pass
+
+    @classmethod
+    def _list_objs(cls, **kwargs):
+        pass
+
+    def _delete_obj(self):
         pass
