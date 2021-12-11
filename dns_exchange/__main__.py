@@ -8,6 +8,7 @@ from typing import Union
 from dns_exchange import config
 from dns_exchange.dictionaries import commands_dict
 from dns_exchange.helpers import Request, Response
+from dns_exchange.models.mongo.users import User
 from dns_exchange.registers import register_all_commands
 
 
@@ -70,4 +71,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+
+    user = User.retrieve(id='61b50ea906561fa61f58ee8b')
+    print(dict(user.assets))

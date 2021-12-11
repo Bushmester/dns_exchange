@@ -5,8 +5,9 @@ from typing import Any, List
 class BaseModelDictFieldInterface(ABC):
     attr_name = ''  # Set attribute name here, e.g. 'assets'
 
-    def __init__(self, owner_id):
+    def __init__(self, owner_id, owner_model_name):
         self._owner_id = owner_id
+        self._owner_model_name = owner_model_name
         self._values_to_save = {}
 
     """Methods"""

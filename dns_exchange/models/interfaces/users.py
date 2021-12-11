@@ -24,7 +24,7 @@ def get_seed_phrase():
 
 
 class UserAssetsInterface(BaseModelDictFieldInterface, ABC):
-    field_name = 'assets'
+    attr_name = 'assets'
 
 
 class UserInterface(BaseModelInterface, ABC):
@@ -33,7 +33,7 @@ class UserInterface(BaseModelInterface, ABC):
 
     def __init__(self, obj_id, is_new, **kwargs):
         super().__init__(obj_id, is_new, **kwargs)
-        self._assets = self.get_user_assets_class()(self._id)
+        self._assets = self.get_user_assets_class()(self._id, self.model_name)
 
     @staticmethod
     def get_default_kwargs(**kwargs):
