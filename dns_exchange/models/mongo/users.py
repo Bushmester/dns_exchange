@@ -24,10 +24,15 @@ class UserAssets:
     def __delitem__(self, key):
         self._delete_value(key)
 
+    def __iter__(self):
+        for key, val in self._list_values().items():
+            yield key, val
+
     def save(self):
-        for key, val in self._assets_to_save.items():
-            self._set_value(key, val)
-        self._assets_to_save = {}
+        if self._assets_to_save:
+            for key, val in self._assets_to_save.items():
+                self._set_value(key, val)
+            self._assets_to_save = {}
 
     """Methods that make interface work"""
 
@@ -39,6 +44,9 @@ class UserAssets:
 
     def _delete_value(self, key: str):
         db[User.table_name].update_one({'id': self._owner_id.id}, {'$unset': {f'{UserAssets.field_name}.{key}': None}})
+
+    def _list_values(self):
+        return db[User.table_name].find_one({'id': self._owner_id.id})[UserAssets.field_name]
 
 
 class User:
@@ -59,6 +67,7 @@ class User:
             'address': get_address(),
             'seed_phrase': get_seed_phrase(),
             'is_admin': False,
+            'assets': {},
             **kwargs
         }
 
@@ -67,17 +76,20 @@ class User:
     @classmethod
     def create(cls, **kwargs):
         default_kwargs = cls.get_default_kwargs(**kwargs)
-        odj_id = default_kwargs.pop('id')
-        return cls(cls.get_default_kwargs(**kwargs), obj_id=odj_id, is_new=True)
+        return cls(**default_kwargs, obj_id=default_kwargs['id'], is_new=True)
 
     @classmethod
     def retrieve(cls, **kwargs):
         obj_id = kwargs['id'] if 'id' in kwargs.keys() else cls._retrieve_obj(**kwargs)['id']
         return cls(obj_id=obj_id, is_new=False)
 
+    @classmethod
+    def list(cls, **kwargs):
+        return [cls.retrieve(id=user_data['id']) for user_data in cls._list_objs(**kwargs)]
+
     def __getattr__(self, key):
         if key in self.descriptor_attrs:
-            getattr(self, f'_{key}')
+            return getattr(self, f'_{key}')
         return self._get_obj_attr(key)
 
     def __setattr__(self, key, value):
@@ -89,11 +101,12 @@ class User:
             self._attrs_to_save[key] = value
 
     def save(self):
-        if self._is_new:
-            self._create_obj(**self._attrs_to_save)
-            self._is_new = False
-        else:
-            self._update_obj(**self._attrs_to_save)
+        if self._attrs_to_save:
+            if self._is_new:
+                self._create_obj(**self._attrs_to_save)
+                self._is_new = False
+            else:
+                self._update_obj(**self._attrs_to_save)
         self._assets.save()
 
     def delete(self):
@@ -104,21 +117,21 @@ class User:
 
     @classmethod
     def _create_obj(cls, **kwargs):
-        db[User.table_name].insert_one({key: val for key, val in kwargs.items()})
+        db[User.table_name].insert_one(kwargs)
 
     def _update_obj(self, **kwargs):
         db[User.table_name].update_one({'id': self._id}, {'$set': {key: val} for key, val in kwargs.items()})
 
     @classmethod
     def _retrieve_obj(cls, **kwargs) -> dict:
-        return db[User.table_name].find_one({key: val for key, val in kwargs.items()})
+        return db[User.table_name].find_one(kwargs)
 
     def _get_obj_attr(self, key) -> Any:
         return db[User.table_name].find_one({'id': self._id})[key]
 
     @classmethod
     def _list_objs(cls, **kwargs) -> List[dict]:
-        pass
+        return db[User.table_name].find(kwargs)
 
     def _delete_obj(self):
         db[User.table_name].delete_one({'id': self._id})
