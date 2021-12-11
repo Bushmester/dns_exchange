@@ -1,18 +1,18 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Any, List
-from bson.objectid import ObjectId
 
 
-class BaseDescriptorInterface(ABC):
-    field_name = ''  # Must be specified by DescriptorInterface (e.g. "assets" for UserAssetsInterface)
-
-    """Interface to work with"""
+class BaseModelDictFieldInterface:
+    field_name = ''
 
     def __init__(self, owner_id):
-        self.owner_id = owner_id
+        self._owner_id = owner_id
+        self._values_to_save = {}
+
+    """Methods"""
 
     def __setitem__(self, key, value):
-        self._set_value(key, value)
+        self._values_to_save[key] = value
 
     def __getitem__(self, key):
         return self._get_value(key)
@@ -20,7 +20,17 @@ class BaseDescriptorInterface(ABC):
     def __delitem__(self, key):
         self._delete_value(key)
 
-    """Methods that make interface work"""
+    def __iter__(self):
+        for key, val in self._list_values().items():
+            yield key, val
+
+    def save(self):
+        if self._values_to_save:
+            for key, val in self._values_to_save.items():
+                self._set_value(key, val)
+            self._values_to_save = {}
+
+    """Abstract methods that make interface work"""
 
     @abstractmethod
     def _set_value(self, key: str, value: Any):
@@ -34,57 +44,73 @@ class BaseDescriptorInterface(ABC):
     def _delete_value(self, key: str):
         pass
 
+    @abstractmethod
+    def _list_values(self):
+        pass
 
-class BaseModelInterface(ABC):
-    # Attributes below must be specified by ModelInterface
-    table_name = ''
-    __slots__ = ('id',)
+
+class BaseModelInterface:
+    table_name = ''  # Set table_name here, e.g. 'users'
+    complex_attrs = ()  # List complex attributes, e.g. ('assets',)
+
+    def __init__(self, obj_id, is_new, **kwargs):
+        self._id = obj_id
+        self._is_new = is_new
+        self._attrs_to_save = {**kwargs}
+
+        # Initialize complex attributes here
+        # e.g. self._assets = UserAssets(self._id)
+
+    @staticmethod
+    def get_default_kwargs(**kwargs):
+        return {
+            # Set default attributes here, e.g. name: 'DefaultName'
+            **kwargs
+        }
 
     """Interface to work with"""
 
-    def __init__(self, **kwargs):
-        for key, val in kwargs.items():
-            self.__dict__[key] = val
-
     @classmethod
     def create(cls, **kwargs):
-        obj = cls(id=ObjectId(), **kwargs)
-        cls._create_obj(id=obj.id, **kwargs)
-        return obj
-
-    def __setattr__(self, key, value):
-        if key in self._predefined_attrs:
-            super().__setattr__(key, value)
-        else:
-            self._set_obj_attr(key, value)
-
-    def __getattr__(self, key):
-        if key in self._predefined_attrs:
-            return super.__getattribute__(self, key)
-        else:
-            self._get_obj_attr(key)
-
-    def __delattr__(self, key):
-        if key in self._predefined_attrs:
-            return super.__delattr__(self, key)
-        else:
-            self._del_obj_attr(key)
+        default_kwargs = cls.get_default_kwargs(**kwargs)
+        return cls(**default_kwargs, obj_id=default_kwargs['id'], is_new=True)
 
     @classmethod
     def retrieve(cls, **kwargs):
-        db_obj_dict = cls._retrieve_obj(**kwargs)
-        return cls(**db_obj_dict)  # {'address': '873', assets: {'btc': 123}}
+        obj_id = kwargs['id'] if 'id' in kwargs.keys() else cls._retrieve_obj(**kwargs)['id']
+        return cls(obj_id=obj_id, is_new=False)
 
-    # List method
     @classmethod
     def list(cls, **kwargs):
-        return cls._list_objs(**kwargs)
+        return [cls.retrieve(id=obj_data['id']) for obj_data in cls._list_objs(**kwargs)]
 
-    # Delete method
-    def __del__(self):
+    def __getattr__(self, key):
+        if key in self.complex_attrs:
+            return getattr(self, f'_{key}')
+        return self._get_obj_attr(key)
+
+    def __setattr__(self, key, value):
+        if key in self.complex_attrs:
+            raise AttributeError('You can\'t set this attribute explicitly')
+        if key[0] == '_':
+            super().__setattr__(key, value)
+        else:
+            self._attrs_to_save[key] = value
+
+    def save(self):
+        if self._attrs_to_save:
+            if self._is_new:
+                self._create_obj(**self._attrs_to_save)
+                self._is_new = False
+            else:
+                self._update_obj(**self._attrs_to_save)
+        self._assets.save()
+
+    def delete(self):
         self._delete_obj()
+        del self
 
-    """Methods that make interface work"""
+    """Abstract methods that make interface work"""
 
     @classmethod
     @abstractmethod
@@ -92,24 +118,23 @@ class BaseModelInterface(ABC):
         pass
 
     @abstractmethod
-    def _set_obj_attr(self, key: str, value: Any):
-        pass
-
-    @abstractmethod
-    def _get_obj_attr(self, key: str) -> Any:
-        pass
-
-    @abstractmethod
-    def _del_obj_attr(self, key: str):
+    def _update_obj(self, **kwargs):
         pass
 
     @classmethod
+    @abstractmethod
     def _retrieve_obj(cls, **kwargs) -> dict:
         pass
 
+    @abstractmethod
+    def _get_obj_attr(self, key) -> Any:
+        pass
+
     @classmethod
+    @abstractmethod
     def _list_objs(cls, **kwargs) -> List[dict]:
         pass
 
+    @abstractmethod
     def _delete_obj(self):
         pass
