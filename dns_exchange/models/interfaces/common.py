@@ -1,9 +1,9 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import Any, List
 
 
-class BaseModelDictFieldInterface:
-    field_name = ''
+class BaseModelDictFieldInterface(ABC):
+    attr_name = ''  # Set attribute name here, e.g. 'assets'
 
     def __init__(self, owner_id):
         self._owner_id = owner_id
@@ -49,8 +49,8 @@ class BaseModelDictFieldInterface:
         pass
 
 
-class BaseModelInterface:
-    table_name = ''  # Set table_name here, e.g. 'users'
+class BaseModelInterface(ABC):
+    model_name = ''  # Set model name here, e.g. 'users'
     complex_attrs = ()  # List complex attributes, e.g. ('assets',)
 
     def __init__(self, obj_id, is_new, **kwargs):
