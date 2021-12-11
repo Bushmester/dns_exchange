@@ -5,9 +5,12 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import Union
 
+from bson import ObjectId
+
 from dns_exchange import config
 from dns_exchange.dictionaries import commands_dict
 from dns_exchange.helpers import Request, Response
+from dns_exchange.models.mongo.users import User
 from dns_exchange.registers import register_all_commands
 
 
@@ -70,4 +73,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+
+    user = User.retrieve(id='61b4e669135ff8f08163d3cc')
+    for key, val in user.assets:
+        print(key, val)

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, List
 from bson.objectid import ObjectId
 
 
@@ -38,15 +38,19 @@ class BaseDescriptorInterface(ABC):
 class BaseModelInterface(ABC):
     # Attributes below must be specified by ModelInterface
     table_name = ''
-    _predefined_attrs = ('id',)
-    __slots__ = (*_predefined_attrs,)
+    __slots__ = ('id',)
 
     """Interface to work with"""
 
     def __init__(self, **kwargs):
-        self.id = ObjectId()
+        for key, val in kwargs.items():
+            self.__dict__[key] = val
 
-        self._create_obj(**kwargs)
+    @classmethod
+    def create(cls, **kwargs):
+        obj = cls(id=ObjectId(), **kwargs)
+        cls._create_obj(id=obj.id, **kwargs)
+        return obj
 
     def __setattr__(self, key, value):
         if key in self._predefined_attrs:
@@ -68,7 +72,8 @@ class BaseModelInterface(ABC):
 
     @classmethod
     def retrieve(cls, **kwargs):
-        return cls._retrieve_obj(**kwargs)
+        db_obj_dict = cls._retrieve_obj(**kwargs)
+        return cls(**db_obj_dict)  # {'address': '873', assets: {'btc': 123}}
 
     # List method
     @classmethod
@@ -81,8 +86,9 @@ class BaseModelInterface(ABC):
 
     """Methods that make interface work"""
 
+    @classmethod
     @abstractmethod
-    def _create_obj(self, **kwargs):
+    def _create_obj(cls, **kwargs):
         pass
 
     @abstractmethod
@@ -90,7 +96,7 @@ class BaseModelInterface(ABC):
         pass
 
     @abstractmethod
-    def _get_obj_attr(self, key: str):
+    def _get_obj_attr(self, key: str) -> Any:
         pass
 
     @abstractmethod
@@ -98,11 +104,11 @@ class BaseModelInterface(ABC):
         pass
 
     @classmethod
-    def _retrieve_obj(cls, **kwargs):
+    def _retrieve_obj(cls, **kwargs) -> dict:
         pass
 
     @classmethod
-    def _list_objs(cls, **kwargs):
+    def _list_objs(cls, **kwargs) -> List[dict]:
         pass
 
     def _delete_obj(self):
