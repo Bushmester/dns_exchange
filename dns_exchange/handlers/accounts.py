@@ -42,7 +42,7 @@ def import_account(**kwargs):
         auth_dict[auth_token] = user
 
         response.auth_token = auth_token
-        response.add_content_text(lines=["Account has been successfully imported!"])
+        response.add_content_text(title="Account has been successfully imported!")
     except TypeError:
         response.add_error("Seed phrase is incorrect!")
 
@@ -56,9 +56,7 @@ def my_account(auth_token: str, **kwargs):
     try:
         user = auth_dict[auth_token]
 
-        response.add_content_text(
-            lines=[f"address: {user.address}"],
-        )
+        response.add_content_text(lines=[f"address: {user.address}"])
     except KeyError:
         response.add_error("Auth is required!")
 
@@ -85,7 +83,7 @@ def account_info(**kwargs):
     try:  # TODO: Any ideas on how to make it clean?
         user = User.retrieve(address=data.address)
         response.add_content_table(
-            "ASSETS",
+            "Assets",
             ["token", "amount"],
             [[key, val] for key, val in user.assets][:data.number]  # TODO: How to slice without copy?
         )
@@ -93,7 +91,7 @@ def account_info(**kwargs):
         try:
             user_transactions = Transaction.list(from_=user.address)
             response.add_content_table(
-                "TRANSACTION HISTORY",
+                "Transactions history",
                 ["date", "from", "to", "token", "amount"],
                 sorted(
                     [[str(t.date), t.from_, t.to, t.token, t.amount] for t in user_transactions][:data.number],

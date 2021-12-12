@@ -31,9 +31,9 @@ def mine(auth_token: str, **kwargs):
             token_amount = get_random_token_amount()
             user = auth_dict[auth_token]
             user.assets['DNS'] = user.assets['DNS'] + token_amount if 'DNS' in dict(user.assets) else token_amount
-            response.add_content_text(lines=[f"You've received {token_amount} DNS tokens!"])
+            response.add_content_text(title=f"You've received {token_amount} DNS tokens!")
         else:
-            response.add_content_text(lines=["Unsuccessful mining!"])
+            response.add_content_text(title="Unsuccessful mining!")
 
     except KeyError:
         response.add_error('Auth is required!')
