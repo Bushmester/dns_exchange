@@ -1,13 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import Any, List
 
-from bson import ObjectId
-
 from dns_exchange.models.interfaces.errors import ArgumentError
-
-
-def get_id():
-    return str(ObjectId())
+from dns_exchange.models.interfaces.helpers import get_id
 
 
 class BaseModelDictFieldInterface(ABC):

@@ -1,14 +1,9 @@
-from uuid import uuid4
-
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.models.mongo.users import User
 from dns_exchange.validators import String, Number
 from dns_exchange.dictionaries import auth_dict
-
-
-def generate_auth_token():
-    return str(uuid4())
+from dns_exchange.handlers.helpers import generate_auth_token
 
 
 # create_account command

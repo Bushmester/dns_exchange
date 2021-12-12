@@ -1,16 +1,7 @@
-from random import uniform, randrange
-
 from dns_exchange.dictionaries import auth_dict
 from dns_exchange.helpers import Response
 from dns_exchange.validators import Number
-
-
-def get_random_mine_number():
-    return randrange(0, 10)
-
-
-def get_random_token_amount():
-    return uniform(0, 10)
+from dns_exchange.handlers.helpers import get_random_mine_number, get_random_token_amount
 
 
 # mine command
