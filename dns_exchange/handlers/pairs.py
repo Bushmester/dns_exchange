@@ -38,7 +38,7 @@ def add_pair(**kwargs):
 
 # delete_pair command
 class DeletePairCommandData:
-    label = String(pattern=r'[a-z]{3,4}_[a-z]{3,4}')
+    label = String(pattern=r'[A-Z]{3,4}_[A-Z]{3,4}')
 
     def __init__(self, **kwargs):
         assert 'label' in kwargs.keys(), 'command "delete_pair" requires argument "label"'
@@ -47,8 +47,16 @@ class DeletePairCommandData:
 
 def delete_pair(**kwargs):
     data = DeletePairCommandData(**kwargs)
-    # TODO: Delete pair logic
-    return Response()
+    response = Response()
+
+    try:
+        token_pair = TokenPair.retrieve(label=data.label)
+        token_pair.delete()
+        response.add_content_text(title=f"{data.label} pair has been successfully removed!")
+    except TypeError:
+        response.add_error("Pair label is incorrect!")
+
+    return response
 
 
 # list_pairs command
