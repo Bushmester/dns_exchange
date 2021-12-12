@@ -50,7 +50,8 @@ class AddTokenCommandData:
 @admin_required
 def add_token(user, **kwargs):
     data = AddTokenCommandData(**kwargs)
-    # TODO: Add token logic
+    user.assets[data.tag] = data.quantity
+    user.save()
     return Response()
 
 
