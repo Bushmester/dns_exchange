@@ -1,3 +1,4 @@
+from dns_exchange.handlers.helpers import auth_not_required
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.validators import Number
@@ -8,10 +9,11 @@ class ListTransactionsCommandData:
     number = Number(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
-        if 'number' in kwargs.keys():
-            self.number = kwargs['number']
+        # Optional arguments
+        self.number = kwargs['number'] if 'number' in kwargs.keys() else None
 
 
+@auth_not_required
 def list_transactions(**kwargs):
     data = ListTransactionsCommandData(**kwargs)
     response = Response()
@@ -19,13 +21,13 @@ def list_transactions(**kwargs):
     try:
         transactions = Transaction.list()
         response.add_content_table(
-            "TRANSACTION HISTORY",
+            "Transaction history",
             ["date", "from", "to", "token", "amount"],
             sorted(
-                [[str(t.date), t.from_, t.to, t.token, t.amount] for t in transactions][:data.number],
-                key=lambda trans: trans[0],
+                [[str(t.date), t.from_, t.to, t.token, t.amount] for t in transactions],
+                key=lambda x: x[0],
                 reverse=True
-            )  # TODO: Any ideas on how to make it clean?
+            )[:data.number]
         )
     except TypeError:
         response.add_error("no transactions!")
