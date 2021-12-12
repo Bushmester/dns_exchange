@@ -19,6 +19,7 @@ def create_account():
         title="New account has been successfully created!",
         lines=[f"address: {new_account.address}", f"seed_phrase: {new_account.seed_phrase}"],
     )
+    new_account.save()
     return response
 
 
