@@ -77,7 +77,8 @@ def list_pair(**kwargs):
     token_pairs = TokenPair.list()
     token_by_filters = []
     for tp in token_pairs:
-        if re.fullmatch(pattern=r'[A-Z]{3,4}_' + f'{data.filter_by_label}', string=tp.label) or re.fullmatch(pattern=f'{data.filter_by_label}_' + r'[A-Z]{3,4}', string=tp.label):
+        if re.fullmatch(pattern=r'[A-Z]{3,4}_' + f'{data.filter_by_label}', string=tp.label) \
+                or re.fullmatch(pattern=f'{data.filter_by_label}_' + r'[A-Z]{3,4}', string=tp.label):
             token_by_filters.append(tp)
 
     if token_by_filters:
