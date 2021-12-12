@@ -1,10 +1,19 @@
 import functools
 from uuid import uuid4
+from random import uniform, randrange
 
 from dns_exchange.dictionaries import auth_dict
 
 
-def generate_account_auth_token():
+def get_random_mine_number():
+    return randrange(1, 10)
+
+
+def get_random_token_amount():
+    return uniform(0, 10)
+
+
+def generate_auth_token():
     return str(uuid4())
 
 

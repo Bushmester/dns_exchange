@@ -61,7 +61,6 @@ class String(Validator):
             raise ValueError(f"Expected {value!r} to be no bigger than {self.maxsize!r}")
         if self.predicate is not None and not self.predicate(value):
             raise ValueError(f"Expected {self.predicate} to be true for {value!r}")
-
         if self.pattern and not re.fullmatch(pattern=self.pattern, string=value):
-            raise ValueError("invalid format!")
+            raise ValueError("Invalid format")
         return value

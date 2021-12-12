@@ -1,21 +1,7 @@
 from abc import ABC, abstractmethod
-from random import randrange, sample
-
-import requests
 
 from dns_exchange.models.interfaces.common import BaseModelInterface, BaseModelDictFieldInterface
-
-
-response = requests.get("https://www.mit.edu/~ecprice/wordlist.10000")
-words = response.content.splitlines()
-
-
-def get_address():
-    return hex(randrange(0, 4294967295))
-
-
-def get_seed_phrase():
-    return ' '.join(x.decode('utf-8') for x in sample(words, 8))
+from dns_exchange.models.interfaces.helpers import get_user_address, get_user_seed_phrase
 
 
 class UserAssetsInterface(BaseModelDictFieldInterface, ABC):
@@ -33,8 +19,8 @@ class UserInterface(BaseModelInterface, ABC):
     @classmethod
     def get_default_kwargs(cls, **kwargs):
         return {
-            'address': get_address(),
-            'seed_phrase': get_seed_phrase(),
+            'address': get_user_address(),
+            'seed_phrase': get_user_seed_phrase(),
             'is_admin': False,
             'assets': {},
             **super().get_default_kwargs(**kwargs)
