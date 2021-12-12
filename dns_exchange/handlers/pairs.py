@@ -1,4 +1,5 @@
 from dns_exchange.helpers import Response
+from dns_exchange.models.mongo.token_pairs import TokenPair
 from dns_exchange.validators import String, Number
 
 
@@ -17,8 +18,22 @@ class AddPairCommandData:
 
 def add_pair(**kwargs):
     data = AddPairCommandData(**kwargs)
-    # TODO: Add pair logic
-    return Response()
+    response = Response()
+
+    try:
+        TokenPair.retrieve(label=f'{data.token1}_{data.token2}')
+    except TypeError:
+        try:
+            TokenPair.retrieve(label=f'{data.token2}_{data.token1}')
+        except TypeError:
+            TokenPair.create(label=f'{data.token1}_{data.token2}').save()
+
+            response.add_content_text(title=f'{data.token1}_{data.token2} pair has been successfully added!')
+        else:
+            response.add_error("Pair already exsists!")
+    else:
+        response.add_error("Pair already exsists!")
+    return response
 
 
 # delete_pair command
