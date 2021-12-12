@@ -11,7 +11,7 @@ words = response.content.splitlines()
 
 
 def get_address():
-    return str(hex(randrange(0, 4294967295)))
+    return hex(randrange(0, 4294967295))
 
 
 def get_seed_phrase():

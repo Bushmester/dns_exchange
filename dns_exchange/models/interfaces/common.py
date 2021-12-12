@@ -3,6 +3,8 @@ from typing import Any, List
 
 from bson import ObjectId
 
+from dns_exchange.models.interfaces.errors import ArgumentError
+
 
 def get_id():
     return str(ObjectId())
@@ -59,6 +61,7 @@ class BaseModelDictFieldInterface(ABC):
 class BaseModelInterface(ABC):
     model_name = ''  # Set model name here, e.g. 'users'
     complex_attrs = ()  # List complex attributes, e.g. ('assets',)
+    required_attrs = {}  # Dict of required attributes, e.g. {'from': hex}
 
     def __init__(self, obj_id, is_new, **kwargs):
         self._id = obj_id
@@ -84,6 +87,14 @@ class BaseModelInterface(ABC):
 
     @classmethod
     def create(cls, **kwargs):
+        if len(kwargs) != len(cls.required_attrs):
+            raise ArgumentError(f'Expected {len(cls.required_attrs)} arguments, but got {len(kwargs)}')
+        for key, key_type in cls.required_attrs.items():
+            if key not in kwargs:
+                raise ArgumentError(f'Missing required "{key}" argument')
+            if not isinstance(kwargs[key], key_type):
+                raise ArgumentError(f'Argument "{key}" must be of type "{key_type}"')
+
         default_kwargs = cls.get_default_kwargs(**kwargs)
         return cls(**default_kwargs, obj_id=default_kwargs['id'], is_new=True)
 
