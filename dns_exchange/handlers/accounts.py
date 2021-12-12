@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from dns_exchange.helpers import Response
+from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.models.mongo.users import User
 from dns_exchange.validators import String, Number
 from dns_exchange.dictionaries import auth_dict
@@ -80,5 +81,28 @@ class AccountsInfoCommandData:
 
 def account_info(**kwargs):
     data = AccountsInfoCommandData(**kwargs)
+    response = Response()
+
+    try:  # TODO: Any ideas on how to make it clean?
+        user = User.retrieve(address=data.address)
+        response.add_content_table(
+            "ASSETS",
+            ["token", "amount"],
+            [[key, val] for key, val in user.assets][:data.number]  # TODO: How to slice without copy?
+        )
+
+        try:
+            user_transactions = Transaction.list(from_=user.address)
+            response.add_content_table(
+                "TRANSACTION HISTORY",
+                ["date", "from", "to", "token", "amount"],
+                [[str(t.date), t.from_, t.to, t.token, t.amount] for t in user_transactions][:data.number]  # TODO: Any ideas on how to make it clean?
+            )
+        except TypeError:
+            pass
+
+    except TypeError:
+        response.add_error("address in incorrect!")
+
     # TODO: Account info logic
-    return Response()
+    return response
