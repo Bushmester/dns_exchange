@@ -1,11 +1,34 @@
 from abc import ABC
 from typing import Any, List
 
-from dns_exchange.models.interfaces.common import BaseModelDictFieldInterface, BaseModelInterface
+from dns_exchange.models.interfaces.common import (
+    BaseModelDictFieldInterface, BaseModelInterface,
+    DBTransactionInterface,
+)
 from dns_exchange.database import db
 
 
-class MongoBaseModelDictField(BaseModelDictFieldInterface, ABC):
+def run_with_transaction(func, *args, **kwargs):
+    with db.start_session() as session:
+        with session.start_transaction():
+            return func(*args, **kwargs)
+
+
+class DBTransaction(DBTransactionInterface):
+    def __init__(self):
+        self.transaction = None
+
+    def enter(self):
+        session = db.start_session()
+        self.transaction = session.start_transaction()
+        return self.transaction
+
+    def exit(self):
+        self.transaction.__exit__()
+        db.close()
+
+
+class BaseModelDictField(BaseModelDictFieldInterface, ABC):
     def _set_value(self, key: str, value: Any):
         db[self._owner_model_name].update_one({'id': self._owner_id}, {'$set': {f'{self.attr_name}.{key}': value}})
 
@@ -19,7 +42,7 @@ class MongoBaseModelDictField(BaseModelDictFieldInterface, ABC):
         return db[self._owner_model_name].find_one({'id': self._owner_id})[self.attr_name]
 
 
-class MongoBaseModel(BaseModelInterface, ABC):
+class BaseModel(BaseModelInterface, ABC):
     @classmethod
     def _create_obj(cls, **kwargs):
         db[cls.model_name].insert_one(kwargs)

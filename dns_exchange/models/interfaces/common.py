@@ -5,6 +5,22 @@ from dns_exchange.models.interfaces.errors import ArgumentError
 from dns_exchange.models.interfaces.helpers import get_id
 
 
+class DBTransactionInterface(ABC):
+    def __enter__(self):
+        return self.enter()
+
+    def __exit__(self):
+        exit()
+
+    @abstractmethod
+    def enter(self):
+        pass
+
+    @abstractmethod
+    def exit(self):
+        pass
+
+
 class BaseModelDictFieldInterface(ABC):
     attr_name = ''  # Set attribute name here, e.g. 'assets'
 
