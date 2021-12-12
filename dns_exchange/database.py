@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 
+from dns_exchange.config import MONGO_DB_LINK
 
-cluster = "mongodb+srv://bushmester:Kwc3cUtCyzMfdGP@cluster0.c18sx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true"
+cluster = MONGO_DB_LINK
 db = MongoClient(cluster).dns

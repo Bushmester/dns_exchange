@@ -8,18 +8,18 @@ from dns_exchange.dictionaries import auth_dict
 
 
 def generate_auth_token():
-    return uuid4()
+    return str(uuid4())
 
 
 # create_account command
 def create_account():
     new_account = User.create()
+    new_account.save()
     response = Response()
     response.add_content_text(
         title="New account has been successfully created!",
         lines=[f"address: {new_account.address}", f"seed_phrase: {new_account.seed_phrase}"],
     )
-    new_account.save()
     return response
 
 
@@ -28,7 +28,7 @@ class ImportAccountCommandData:
     seed_phrase = String(predicate=lambda x: len(x.split()) >= 6)
 
     def __init__(self, **kwargs):
-        assert 'seed_phrase' in kwargs.keys(), 'command "import_account" requires argument "seed_phrase"'
+        assert 'seed_phrase' in kwargs.keys(), 'Command "import_account" requires argument "seed_phrase"'
         self.seed_phrase = kwargs['seed_phrase']
 
 
@@ -38,15 +38,13 @@ def import_account(**kwargs):
 
     try:
         user = User.retrieve(seed_phrase=data.seed_phrase)
-        auth_token = str(generate_auth_token())
+        auth_token = generate_auth_token()
         auth_dict[auth_token] = user
 
         response.auth_token = auth_token
-        response.add_content_text(
-            lines=["Account has been successfully imported!"],
-        )
+        response.add_content_text(lines=["Account has been successfully imported!"])
     except TypeError:
-        response.add_error("seed phrase is incorrect!")
+        response.add_error("Seed phrase is incorrect!")
 
     return response
 
@@ -62,7 +60,7 @@ def my_account(auth_token: str, **kwargs):
             lines=[f"address: {user.address}"],
         )
     except KeyError:
-        response.add_error("auth is required!")
+        response.add_error("Auth is required!")
 
     return response
 
@@ -73,7 +71,7 @@ class AccountsInfoCommandData:
     number = Number(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
-        assert 'address' in kwargs.keys(), 'command "account_info" requires argument "address"'
+        assert 'address' in kwargs.keys(), 'Command "account_info" requires argument "address"'
         self.address = kwargs['address']
 
         if 'number' in kwargs.keys():
@@ -107,7 +105,6 @@ def account_info(**kwargs):
             pass
 
     except TypeError:
-        response.add_error("address in incorrect!")
+        response.add_error("Address in incorrect!")
 
-    # TODO: Account info logic
     return response

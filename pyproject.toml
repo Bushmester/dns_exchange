@@ -8,6 +8,7 @@ authors = ["Ilnar Gomelyanov <hibushland@gmail.com>"]
 python = "^3.8"
 pymongo = {extras = ["srv"], version = "^4.0.1"}
 requests = "^2.26.0"
+python-dotenv = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -5,6 +5,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import Union
 
+from dotenv import load_dotenv, find_dotenv
+
 from dns_exchange import config
 from dns_exchange.dictionaries import commands_dict
 from dns_exchange.helpers import Request, Response
@@ -55,6 +57,7 @@ def handle_client(conn, addr):
 
 
 def main():
+    load_dotenv(find_dotenv())
     register_all_commands()
     print(f"Started process with PID={os.getpid()}")
 
