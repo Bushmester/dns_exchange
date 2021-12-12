@@ -84,7 +84,7 @@ class ListPairsCommandData:
 
 
 @auth_not_required
-def list_pair(**kwargs):
+def list_pairs(**kwargs):
     data = ListPairsCommandData(**kwargs)
     response = Response()
 
