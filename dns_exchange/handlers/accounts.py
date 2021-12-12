@@ -96,7 +96,11 @@ def account_info(**kwargs):
             response.add_content_table(
                 "TRANSACTION HISTORY",
                 ["date", "from", "to", "token", "amount"],
-                [[str(t.date), t.from_, t.to, t.token, t.amount] for t in user_transactions][:data.number]  # TODO: Any ideas on how to make it clean?
+                sorted(
+                    [[str(t.date), t.from_, t.to, t.token, t.amount] for t in user_transactions][:data.number],
+                    key=lambda trans: trans[0],
+                    reverse=True
+                )  # TODO: Any ideas on how to make it clean?
             )
         except TypeError:
             pass
