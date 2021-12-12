@@ -1,17 +1,15 @@
-from dns_exchange.handlers.helpers import generate_account_auth_token, auth_not_required, auth_required
+from dns_exchange.handlers.helpers import auth_not_required, auth_required, generate_auth_token
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.models.mongo.users import User
 from dns_exchange.validators import String, Number
 from dns_exchange.dictionaries import auth_dict
-from dns_exchange.handlers.helpers import generate_auth_token
 
 
 # create_account command
 @auth_not_required
 def create_account():
-    new_account = User.create()
-    new_account.save()
+    new_account = User.create().save()
     response = Response()
     response.add_content_text(
         title="New account has been successfully created!",
@@ -43,7 +41,7 @@ def import_account(**kwargs):
     except TypeError:
         response.add_error("Seed phrase is incorrect!")
     else:
-        auth_token = generate_account_auth_token()
+        auth_token = generate_auth_token()
         auth_dict[auth_token] = user
         response.auth_token = auth_token
         response.add_content_text(title="Account has been successfully imported!")

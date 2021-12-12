@@ -18,18 +18,15 @@ def list_transactions(**kwargs):
     data = ListTransactionsCommandData(**kwargs)
     response = Response()
 
-    try:
-        transactions = Transaction.list()
-        response.add_content_table(
-            "Transaction history",
-            ["date", "from", "to", "token", "amount"],
-            sorted(
-                [[str(t.date), t.from_, t.to, t.token, t.amount] for t in transactions],
-                key=lambda x: x[0],
-                reverse=True
-            )[:data.number]
-        )
-    except TypeError:
-        response.add_error("no transactions!")
+    transactions = Transaction.list()
+    response.add_content_table(
+        "Transaction history",
+        ["date", "from", "to", "token", "amount"],
+        sorted(
+            [[str(t.date), t.from_, t.to, t.token, t.amount] for t in transactions],
+            key=lambda x: x[0],
+            reverse=True
+        )[:data.number]
+    )
 
     return response

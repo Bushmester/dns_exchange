@@ -26,18 +26,24 @@ def add_pair(user, **kwargs):
     data = AddPairCommandData(**kwargs)
     response = Response()
 
+    token_pair = None
+
     try:
-        TokenPair.retrieve(label=f'{data.token1}_{data.token2}')
+        token_pair = TokenPair.retrieve(label=f'{data.token1}_{data.token2}')
     except TypeError:
-        try:
-            TokenPair.retrieve(label=f'{data.token2}_{data.token1}')
-        except TypeError:
-            TokenPair.create(label=f'{data.token1}_{data.token2}').save()
-            response.add_content_text(title=f'{data.token1}_{data.token2} pair has been successfully added!')
-        else:
-            response.add_error("Pair already exists!")
-    else:
+        pass
+
+    try:
+        token_pair = TokenPair.retrieve(label=f'{data.token2}_{data.token1}')
+    except TypeError:
+        pass
+
+    if token_pair is not None:
         response.add_error("Pair already exists!")
+    else:
+        TokenPair.create(label=f'{data.token1}_{data.token2}').save()
+        response.add_content_text(title=f'{data.token1}_{data.token2} pair has been successfully added!')
+
     return response
 
 
@@ -82,21 +88,13 @@ def list_pair(**kwargs):
     data = ListPairsCommandData(**kwargs)
     response = Response()
 
-    token_pairs = TokenPair.list()
-    token_by_filters = []
-    for tp in token_pairs:
-        if re.fullmatch(pattern=r'[A-Z]{3,4}_' + f'{data.filter_by_label}', string=tp.label) \
-                or re.fullmatch(pattern=f'{data.filter_by_label}_' + r'[A-Z]{3,4}', string=tp.label):
-            token_by_filters.append(tp)
+    pattern = r'([A-Z]{3,4}_' + f'{data.filter_by_label})' + r'|' + f'({data.filter_by_label}_' + r'[A-Z]{3,4})'
+    token_pairs_filtered = list(filter(lambda x: re.fullmatch(pattern, x.label), TokenPair.list()))
 
-    if token_by_filters:
-        response.add_content_table(
-            "",
-            ["Label"],
-            [token.label for token in token_by_filters]
-        )
+    if token_pairs_filtered:
+        response.add_content_table("", ["label"], [tp.label for tp in token_pairs_filtered])
     else:
-        response.add_error("No pairs found!")
+        response.add_content_text(title="No pairs found!")
 
     return response
 
