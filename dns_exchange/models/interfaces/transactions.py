@@ -6,4 +6,4 @@ from dns_exchange.models.interfaces.common import BaseModelInterface
 
 class TransactionInterface(BaseModelInterface, ABC):
     model_name = 'transactions'
-    required_attrs = {'date': datetime, 'from': hex, 'to': hex, 'token': str, 'amount': float}
+    required_attrs = {'date': datetime, 'from_': str, 'to': str, 'token': str, 'amount': float}
