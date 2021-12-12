@@ -1,11 +1,18 @@
+from uuid import uuid4
+
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.users import User
 from dns_exchange.validators import String, Number
+from dns_exchange.dictionaries import auth_dict
+
+
+def generate_auth_token():
+    return uuid4()
 
 
 # create_account command
 def create_account():
-    new_account = User()
+    new_account = User.create()
     response = Response()
     response.add_content_text(
         title="New account has been successfully created!",
@@ -25,8 +32,17 @@ class ImportAccountCommandData:
 
 def import_account(**kwargs):
     data = ImportAccountCommandData(**kwargs)
-    # TODO: Import account logic
-    return Response()
+    response = Response()
+
+    try:
+        user = User.retrieve(seed_phrase=data.seed_phrase)
+        auth_token = str(generate_auth_token())
+        auth_dict[auth_token] = user
+        response.auth_token = auth_token
+    except TypeError:
+        response.add_error("User with this seed phrase not found")
+
+    return response
 
 
 # my_account command
