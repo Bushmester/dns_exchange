@@ -38,9 +38,13 @@ def import_account(**kwargs):
         user = User.retrieve(seed_phrase=data.seed_phrase)
         auth_token = str(generate_auth_token())
         auth_dict[auth_token] = user
+
         response.auth_token = auth_token
+        response.add_content_text(
+            lines=["Account has been successfully imported!"],
+        )
     except TypeError:
-        response.add_error("User with this seed phrase not found")
+        response.add_error("seed phrase is incorrect!")
 
     return response
 
