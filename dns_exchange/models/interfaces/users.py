@@ -1,26 +1,49 @@
 from abc import ABC, abstractmethod
+from random import randrange, sample
 
-from dns_exchange.models.interfaces.common import BaseModelInterface, BaseDescriptorInterface
+import requests
+
+from dns_exchange.models.interfaces.common import BaseModelInterface, BaseModelDictFieldInterface
 
 
-class UserAssetsInterface(BaseDescriptorInterface, ABC):
-    field_name = 'assets'
+response = requests.get("https://www.mit.edu/~ecprice/wordlist.10000")
+words = response.content.splitlines()
+
+
+def get_address():
+    return hex(randrange(0, 4294967295))
+
+
+def get_seed_phrase():
+    return ' '.join(x.decode('utf-8') for x in sample(words, 8))
+
+
+class UserAssetsInterface(BaseModelDictFieldInterface, ABC):
+    attr_name = 'assets'
 
 
 class UserInterface(BaseModelInterface, ABC):
-    table_name = 'users'
-    __slots__ = ('id', 'address', 'seed_phrase', 'is_admin', 'assets')
+    model_name = 'users'
+    complex_attrs = ('assets',)
 
-    def __init__(self):
-        super().__init__(assets={})
-        self.address = '0x9c3f7c50'  # TODO: Generate address
-        self.seed_phrase = 'red blue green yellow orange dick'  # TODO: Generate seed_phrase
-        self.is_admin = False
-        self.__class__.assets = self._get_assets_descriptor_obj()
+    def __init__(self, obj_id, is_new, **kwargs):
+        super().__init__(obj_id, is_new, **kwargs)
+        self._assets = self.get_user_assets_class()(self._id, self.model_name)
+
+    @classmethod
+    def get_default_kwargs(cls, **kwargs):
+        return {
+            'address': get_address(),
+            'seed_phrase': get_seed_phrase(),
+            'is_admin': False,
+            'assets': {},
+            **super().get_default_kwargs(**kwargs)
+        }
+
+    def save_complex_attrs(self):
+        self._assets.save()
 
     @staticmethod
     @abstractmethod
-    def _get_assets_descriptor_obj():
-        # Simply uncomment line below
-        # return UserAssets()
+    def get_user_assets_class():
         pass

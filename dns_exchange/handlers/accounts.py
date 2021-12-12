@@ -1,11 +1,11 @@
 from dns_exchange.helpers import Response
-from dns_exchange.services.Account import Account
+from dns_exchange.models.mongo.users import User
 from dns_exchange.validators import String, Number
 
 
 # create_account command
 def create_account():
-    new_account = Account()
+    new_account = User()
     response = Response()
     response.add_content_text(
         title="New account has been successfully created!",
