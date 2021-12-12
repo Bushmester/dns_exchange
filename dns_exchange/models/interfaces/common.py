@@ -8,6 +8,15 @@ def get_id():
     return str(ObjectId())
 
 
+class BaseModelListOfDictsField(ABC):
+    attr_name = ''  # Set attribute name here, e.g. 'buy_orders'
+
+    def __init__(self, owner_id, owner_model_name):
+        self._owner_id = owner_id
+        self._owner_model_name = owner_model_name
+        self._values_to_save = {}
+
+
 class BaseModelDictFieldInterface(ABC):
     attr_name = ''  # Set attribute name here, e.g. 'assets'
 
