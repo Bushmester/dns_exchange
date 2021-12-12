@@ -7,7 +7,7 @@ def check_auth_token(auth_token: str) -> None:
     if auth_token == '':
         raise KeyError('Auth token is empty!')
     if auth_token not in auth_dict:
-        raise KeyError('Auth token token not valid!')
+        raise KeyError('Auth token token is not valid!')
 
 
 def auth_required(func):
@@ -32,6 +32,6 @@ def admin_required(func):
         check_auth_token(auth_token)
         user = auth_dict[auth_token]
         if not user.is_admin:
-            raise PermissionError('Admin rights required!')
+            raise PermissionError('Admin rights are required!')
         return func(user=user, **kwargs)
     return wrapper

@@ -50,7 +50,12 @@ class AddTokenCommandData:
 @admin_required
 def add_token(user, **kwargs):
     data = AddTokenCommandData(**kwargs)
-    user.assets[data.tag] = data.quantity
+    user_assets = dict(user.assets)
+    if data.tag in user_assets:
+        user.assets[data.tag] = user_assets[data.tag] + data.quantity
+    else:
+        user.assets[data.tag] = data.quantity
+    # TODO: Add response text
     user.save()
     return Response()
 
@@ -133,6 +138,8 @@ def buy(user="", **kwargs):
             amount=data.amount,
             address=user.address
         )
+
+    # TODO: Add response text
 
     return response
 
