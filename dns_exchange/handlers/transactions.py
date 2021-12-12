@@ -1,12 +1,12 @@
 from dns_exchange.handlers.helpers import auth_not_required
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.transactions import Transaction
-from dns_exchange.validators import Number
+from dns_exchange.validators import IntNumber
 
 
 # list_transactions command
 class ListTransactionsCommandData:
-    number = Number(minvalue=1, maxvalue=50)
+    number = IntNumber(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
         # Optional arguments

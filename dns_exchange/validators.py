@@ -28,7 +28,7 @@ class OneOf(Validator):
         return value
 
 
-class Number(Validator):
+class IntNumber(Validator):
     def __init__(self, minvalue: int = None, maxvalue: int = None):
         self.minvalue = minvalue
         self.maxvalue = maxvalue
@@ -36,6 +36,23 @@ class Number(Validator):
     def validate(self, value):
         try:
             value = int(value)
+        except ValueError:
+            raise TypeError(f"Expected {value!r} to be an int or float")
+        if self.minvalue is not None and value < self.minvalue:
+            raise ValueError(f"Expected {value!r} to be at least {self.minvalue!r}")
+        if self.maxvalue is not None and value > self.maxvalue:
+            raise ValueError(f"Expected {value!r} to be no more than {self.maxvalue!r}")
+        return value
+
+
+class FloatNumber(Validator):
+    def __init__(self, minvalue: float = None, maxvalue: float = None):
+        self.minvalue = minvalue
+        self.maxvalue = maxvalue
+
+    def validate(self, value):
+        try:
+            value = float(value)
         except ValueError:
             raise TypeError(f"Expected {value!r} to be an int or float")
         if self.minvalue is not None and value < self.minvalue:
