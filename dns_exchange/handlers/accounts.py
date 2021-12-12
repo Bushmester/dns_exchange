@@ -50,9 +50,19 @@ def import_account(**kwargs):
 
 
 # my_account command
-def my_account(**kwargs):
-    # TODO: My account logic
-    return Response()
+def my_account(auth_token: str, **kwargs):
+    response = Response()
+
+    try:
+        user = auth_dict[auth_token]
+
+        response.add_content_text(
+            lines=[f"address: {user.address}"],
+        )
+    except KeyError:
+        response.add_error("auth is required!")
+
+    return response
 
 
 # account_info command
