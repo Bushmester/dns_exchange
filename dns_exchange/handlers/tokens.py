@@ -6,7 +6,7 @@ from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.token_pairs import SellOrder, BuyOrder
 from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.models.mongo.users import User
-from dns_exchange.validators import String, IntNumber, FloatNumber
+from dns_exchange.validators import String, FloatNumber
 
 
 # add_token command
@@ -56,8 +56,8 @@ def buy(user="", **kwargs):
 
     sell_orders = list(
         filter(
-            lambda x: x.exchange_rate <= data.exchange_rate,
-            sorted(SellOrder.list(pair_label=data.trading_pair), key=lambda order: order.exchange_rate)
+            lambda x: x.exchange_rate <= data.exchange_rate if data.exchange_rate is not None else True,
+            sorted(SellOrder.list(pair_label=data.trading_pair), key=lambda x: x.exchange_rate)
         )
     )
 
@@ -69,7 +69,6 @@ def buy(user="", **kwargs):
             seller = User.retrieve(address=sell_order.address)
             token1, token2 = data.trading_pair.split('_')
 
-            # tut
             with db.start_session() as session:
                 with session.start_transaction():
                     # If order filled fully
@@ -125,27 +124,30 @@ def buy(user="", **kwargs):
                         amount=token2_amount
                     ).save()
 
-                    # Check if buyer and seller balances are >0
+                    # Check if buyer and seller balances are positive
                     seller_legit = seller.assets[token1] > 0
                     buyer_legit = buyer.assets[token2] > 0
 
                     if not all([seller_legit, buyer_legit]):
-                        pass  # TODO: Rollback transaction and return error message to user
+                        raise ValueError('Asset amount can\'t be negative!')
 
-            # Delete order if seller unable perform operation
+            # Delete order if seller unable to perform operation
             if not seller_legit:
                 sell_order.delete()
 
             data.amount -= token1_amount
+
         else:
             break
 
     # Place buy order if needed
-    BuyOrder.create(
-        pair_label=data.trading_pair,
-        exchange_rate=
-    )
-
+    if data.amount > 0 and data.exchange_rate:
+        BuyOrder.create(
+            pair_label=data.trading_pair,
+            exchange_rate=data.exchange_rate,
+            amount=data.amount,
+            address=user.address
+        )
 
     return response
 
@@ -172,92 +174,5 @@ class SellCommandData:
 def sell(user, **kwargs):
     data = SellCommandData(**kwargs)
     response = Response()
-
-    buy_orders = list(
-        filter(
-            lambda x: x.exchange_rate <= data.exchange_rate,
-            sorted(BuyOrder.list(pair_label=data.trading_pair), key=lambda order: order.exchange_rate)
-        )
-    )
-
-    for buy_order in buy_orders:
-        if data.amount > 0:
-            order_exchange_rate = buy_order.exchange_rate
-            order_amount = buy_order.amount
-            seller = user
-            buyer = User.retrieve(address=buy_order.address)
-            token1, token2 = data.trading_pair.split('_')
-
-            # If order filled fully
-            if data.amount >= order_amount:
-                token1_amount = order_amount
-                buy_order.delete()
-            # If order filled partially
-            else:
-                token1_amount = data.amount
-                buy_order.amount = buy_order.amount - data.amount
-
-            token2_amount = token1_amount * order_exchange_rate
-
-            # Withdraw token1 from buyer
-            buyer.assets[token1] = buyer.assets[token1] - token1_amount
-            buyer.save()
-
-            # Deposit token1 to seller
-            seller_assets_dict = dict(seller.assets)
-            if token1 in seller_assets_dict:
-                seller.assets[token1] = seller_assets_dict[token1] + token1_amount
-            else:
-                seller.assets[token1] = token1_amount
-            seller.save()
-
-            # Create buyer-to-seller transaction record
-            Transaction.create(
-                date=datetime.utcnow(),
-                from_=buy_order.address,
-                to=user.address,
-                token=token1,
-                amount=token1_amount
-            ).save()
-
-            # Withdraw token2 from seller
-            seller.assets[token2] = seller.assets[token2] - token2_amount
-            seller.save()
-
-            # Deposit token2 to buyer
-            buyer_assets_dict = dict(buyer.assets)
-            if token2 in buyer_assets_dict:
-                buyer.assets[token2] = buyer_assets_dict[token2] + token2_amount
-            else:
-                buyer.assets[token2] = token2_amount
-            buyer.save()
-
-            # Create seller-to-buyer transaction record
-            Transaction.create(
-                date=datetime.utcnow(),
-                from_=user.address,
-                to=buy_order.address,
-                token=token2,
-                amount=token2_amount
-            ).save()
-
-            # Check if seller and buyer balances are >0
-            buyer_legit = buyer.assets[token1] > 0
-            seller_legit = seller.assets[token2] > 0
-
-            if not all([buyer_legit, seller_legit]):
-                pass  # TODO: Rollback transaction and return error message to user
-
-            # Delete order if seller unable perform operation
-            if not buyer_legit:
-                buy_order.delete()
-
-            data.amount -= token1_amount
-        else:
-            break
-
-    # Place sell order if needed
-    SellOrder.create(pair_label=data.trading_pair)
-
     # TODO: Sell logic
     return response
