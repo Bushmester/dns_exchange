@@ -9,6 +9,30 @@ from dns_exchange.models.mongo.users import User
 from dns_exchange.validators import String, FloatNumber
 
 
+# Helpers
+def perform_transfer(user_from: User, user_to: User, token_tag: str, amount: float) -> None:
+    # Withdraw token_tag from user_from
+    user_from.assets[token_tag] = user_from.assets[token_tag] - amount
+    user_from.save()
+
+    # Deposit token_tag to user_to
+    user_to_assets_dict = dict(user_to.assets)
+    if token_tag in user_to_assets_dict:
+        user_to.assets[token_tag] = user_to_assets_dict[token_tag] + amount
+    else:
+        user_to.assets[token_tag] = amount
+    user_to.save()
+
+    # Create user_from to user_to transaction record
+    Transaction.create(
+        date=datetime.utcnow(),
+        from_=user_from.address,
+        to=user_to.address,
+        token=token_tag,
+        amount=amount
+    ).save()
+
+
 # add_token command
 class AddTokenCommandData:
     tag = String(minsize=3, maxsize=4)
@@ -81,47 +105,8 @@ def buy(user="", **kwargs):
 
                 token2_amount = token1_amount * order_exchange_rate
 
-                # Withdraw token1 from seller
-                seller.assets[token1] = seller.assets[token1] - token1_amount
-                seller.save()
-
-                # Deposit token1 to buyer
-                buyer_assets_dict = dict(buyer.assets)
-                if token1 in buyer_assets_dict:
-                    buyer.assets[token1] = buyer_assets_dict[token1] + token1_amount
-                else:
-                    buyer.assets[token1] = token1_amount
-                buyer.save()
-
-                # Create seller-to-buyer transaction record
-                Transaction.create(
-                    date=datetime.utcnow(),
-                    from_=sell_order.address,
-                    to=user.address,
-                    token=token1,
-                    amount=token1_amount
-                ).save()
-
-                # Withdraw token2 from buyer
-                buyer.assets[token2] = buyer.assets[token2] - token2_amount
-                buyer.save()
-
-                # Deposit token2 to seller
-                seller_assets_dict = dict(seller.assets)
-                if token2 in seller_assets_dict:
-                    seller.assets[token2] = seller_assets_dict[token2] + token2_amount
-                else:
-                    seller.assets[token2] = token2_amount
-                seller.save()
-
-                # Create buyer-to-seller transaction record
-                Transaction.create(
-                    date=datetime.utcnow(),
-                    from_=user.address,
-                    to=sell_order.address,
-                    token=token2,
-                    amount=token2_amount
-                ).save()
+                perform_transfer(seller, buyer, token1, token1_amount)
+                perform_transfer(buyer, seller, token2, token2_amount)
 
                 # Check if buyer and seller balances are positive
                 seller_legit = seller.assets[token1] > 0
@@ -140,7 +125,7 @@ def buy(user="", **kwargs):
             break
 
     # Place buy order if needed
-    if data.amount > 0 and data.exchange_rate:
+    if data.amount > 0 and data.exchange_rate is not None:
         BuyOrder.create(
             pair_label=data.trading_pair,
             exchange_rate=data.exchange_rate,

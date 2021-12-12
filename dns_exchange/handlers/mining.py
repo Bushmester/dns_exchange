@@ -1,7 +1,17 @@
+from random import uniform, randrange
+
 from dns_exchange.handlers.helpers import auth_required
 from dns_exchange.helpers import Response
 from dns_exchange.validators import IntNumber
-from dns_exchange.handlers.helpers import get_random_mine_number, get_random_token_amount
+
+
+# Helpers
+def get_random_mine_number() -> int:
+    return randrange(1, 10)
+
+
+def get_random_token_amount() -> float:
+    return uniform(0, 10)
 
 
 # mine command
