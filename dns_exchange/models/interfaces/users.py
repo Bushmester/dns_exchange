@@ -2,17 +2,12 @@ from abc import ABC, abstractmethod
 from random import randrange, sample
 
 import requests
-from bson import ObjectId
 
 from dns_exchange.models.interfaces.common import BaseModelInterface, BaseModelDictFieldInterface
 
 
 response = requests.get("https://www.mit.edu/~ecprice/wordlist.10000")
 words = response.content.splitlines()
-
-
-def get_id():
-    str(ObjectId())
 
 
 def get_address():
@@ -35,16 +30,18 @@ class UserInterface(BaseModelInterface, ABC):
         super().__init__(obj_id, is_new, **kwargs)
         self._assets = self.get_user_assets_class()(self._id, self.model_name)
 
-    @staticmethod
-    def get_default_kwargs(**kwargs):
+    @classmethod
+    def get_default_kwargs(cls, **kwargs):
         return {
-            'id': get_id(),
             'address': get_address(),
             'seed_phrase': get_seed_phrase(),
             'is_admin': False,
             'assets': {},
-            **kwargs
+            **super().get_default_kwargs(**kwargs)
         }
+
+    def save_complex_attrs(self):
+        self._assets.save()
 
     @staticmethod
     @abstractmethod

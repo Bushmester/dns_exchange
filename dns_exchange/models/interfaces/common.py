@@ -1,6 +1,12 @@
 from abc import abstractmethod, ABC
 from typing import Any, List
 
+from bson import ObjectId
+
+
+def get_id():
+    return str(ObjectId())
+
 
 class BaseModelDictFieldInterface(ABC):
     attr_name = ''  # Set attribute name here, e.g. 'assets'
@@ -62,12 +68,17 @@ class BaseModelInterface(ABC):
         # Initialize complex attributes here
         # e.g. self._assets = UserAssets(self._id)
 
-    @staticmethod
-    def get_default_kwargs(**kwargs):
+    @classmethod
+    def get_default_kwargs(cls, **kwargs):
         return {
             # Set default attributes here, e.g. name: 'DefaultName'
+            'id': get_id(),
             **kwargs
         }
+
+    def save_complex_attrs(self):
+        # Call complex attributes .save() methods here, e.g. self._assets.save()
+        pass
 
     """Interface to work with"""
 
@@ -105,7 +116,7 @@ class BaseModelInterface(ABC):
                 self._is_new = False
             else:
                 self._update_obj(**self._attrs_to_save)
-        self._assets.save()
+        self.save_complex_attrs()
 
     def delete(self):
         self._delete_obj()
