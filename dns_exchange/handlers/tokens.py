@@ -78,10 +78,25 @@ class BuyCommandData:
         self.exchange_rate = kwargs['exchange_rate'] if 'exchange_rate' in kwargs.keys() else None
 
 
-@auth_required
+# @auth_required
 def buy(user, **kwargs):
     data = BuyCommandData(**kwargs)
     response = Response()
+    response_text_lines = []
+
+    token1, token2 = data.trading_pair.split('_')
+
+    check = None
+    try:
+        check = user.assets[token2]
+    except KeyError:
+        pass
+
+    if (check is None) or (check < data.amount * data.exchange_rate):
+        response_text_lines.append(f'You do not have enough {token2} to buy {token1} ')
+        response.add_content_text(lines=response_text_lines)
+        print(response_text_lines)
+        return response
 
     sell_orders = list(
         filter(
@@ -89,9 +104,6 @@ def buy(user, **kwargs):
             sorted(SellOrder.list(pair_label=data.trading_pair), key=lambda x: x.exchange_rate)
         )
     )
-
-    response_text_lines = []
-    token1, token2 = data.trading_pair.split('_')
 
     for sell_order in sell_orders:
         if data.amount > 0:
@@ -141,13 +153,13 @@ def buy(user, **kwargs):
             exchange_rate=data.exchange_rate,
             amount=data.amount,
             address=user.address
-        )
+        ).save()
         response_text_lines.append(
             f'Placed {data.amount} {token1} buy order ({data.exchange_rate} {token2} per 1 {token1})'
         )
 
     response.add_content_text(lines=response_text_lines)
-
+    print(response_text_lines)
     return response
 
 
