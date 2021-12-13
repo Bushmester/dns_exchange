@@ -99,10 +99,11 @@ class BaseModelInterface(ABC):
 
     @classmethod
     def create(cls, **kwargs):
-        if len(kwargs) != len(cls.required_attrs) + len(cls.optional_attrs):
+        if len(kwargs) < len(cls.required_attrs):
+            raise ArgumentError(f'Expected {len(cls.required_attrs)} required arguments, but got {len(kwargs)}')
+        if len(kwargs) > len(cls.required_attrs) + len(cls.optional_attrs):
             raise ArgumentError(
-                f'Expected {len(cls.required_attrs)} required and ${len(cls.optional_attrs)} optional arguments, '
-                f'but got {len(kwargs)}'
+                f'Expected maximum {len(cls.required_attrs) + len(cls.optional_attrs)} arguments, but got {len(kwargs)}'
             )
         for key, key_type in cls.required_attrs.items():
             if key not in kwargs:
