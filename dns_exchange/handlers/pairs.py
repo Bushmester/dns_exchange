@@ -2,7 +2,7 @@ import re
 
 from dns_exchange.handlers.helpers import admin_required, auth_not_required
 from dns_exchange.helpers import Response
-from dns_exchange.models.mongo.token_pairs import TokenPair
+from dns_exchange.models.mongo.token_pairs import TokenPair, SellOrder, BuyOrder
 from dns_exchange.validators import String, IntNumber
 
 
@@ -110,12 +110,40 @@ class PairInfoCommandData:
         self.label = kwargs['label']
 
         # Optional arguments
-        self.number = kwargs['number'] if 'number' in kwargs.keys() else None
+        self.number = kwargs['number'] if 'number' in kwargs.keys() else 5
 
 
 @auth_not_required
 def pair_info(**kwargs):
     data = PairInfoCommandData(**kwargs)
     response = Response()
-    # TODO: Pair info logic
+
+    try:
+        TokenPair.retrieve(label=data.label)
+    except TypeError:
+        response.add_error("Pair label is incorrect!")
+    else:
+        token1, token2 = data.label.split('_')
+
+        sell_orders = sorted(SellOrder.list(pair_label=data.label), key=lambda x: x.exchange_rate)[:data.number]
+        response.add_content_table(
+            "Sell orders",
+            [f"exchange_rate({token1})", f"amount({token2})"],
+            sorted(
+                [[so.exchange_rate, so.amount] for so in sell_orders],
+                key=lambda x: x[0]
+            )[:data.number][::-1]
+        )
+
+        buy_orders = sorted(BuyOrder.list(pair_label=data.label), key=lambda x: x.exchange_rate)[:data.number]
+        response.add_content_table(
+            "Buy orders",
+            [f"exchange_rate({token1})", f"amount({token2})"],
+            sorted(
+                [[bo.exchange_rate, bo.amount] for bo in buy_orders],
+                key=lambda x: x[0],
+                reverse=True
+            )[:data.number]
+        )
+
     return response
