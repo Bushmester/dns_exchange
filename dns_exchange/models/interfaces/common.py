@@ -9,15 +9,15 @@ class DBTransactionInterface(ABC):
     def __enter__(self):
         return self.enter()
 
-    def __exit__(self):
-        exit()
+    def __exit__(self, exc_type, exc_value, tb):
+        self.exit(exc_type, exc_value, tb)
 
     @abstractmethod
     def enter(self):
         pass
 
     @abstractmethod
-    def exit(self):
+    def exit(self, exc_type, exc_value, tb):
         pass
 
 
