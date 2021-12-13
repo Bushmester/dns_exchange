@@ -34,8 +34,3 @@ def get_user(is_admin=False, auth_token=False):
         result['auth_token'] = auth_token
 
     return result
-
-
-def clean_db(lst_with_objects: list):
-    for obj in lst_with_objects:
-        obj.delete()

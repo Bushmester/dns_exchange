@@ -2,25 +2,19 @@ import pytest
 
 from dns_exchange.models.mongo.users import User
 from dns_exchange.handlers import accounts
+from dns_exchange.models.mongo.token_pairs import TokenPair, BuyOrder, SellOrder
+from dns_exchange.models.mongo.transactions import Transaction
 
 
-@pytest.fixture()
-def get_user(request):
-    user = User.create().save()
-    seed_phrase = user.seed_phrase
+@pytest.fixture(scope='function')
+def clean_db():
+    models_for_clean = [TokenPair, BuyOrder, SellOrder, Transaction, User]
 
-    request.cls.user = user
+    for i in range(2):
+        for model in models_for_clean:
+            lst_with_objects = model.list()
 
-
-@pytest.fixture()
-def get_user_with_auth_token(request):
-    user = User.create().save()
-    seed_phrase = user.seed_phrase
-
-    response_from_import = accounts.import_account(seed_phrase=seed_phrase, auth_token='')
-    auth_token = response_from_import.auth_token
-
-    request.cls.user = user
-    request.cls.auth_token = auth_token
-
-
+            for obj in lst_with_objects:
+                obj.delete()
+        if i == 0:
+            yield

@@ -1,3 +1,5 @@
+import pytest
+
 from dns_exchange.handlers import accounts
 from dns_exchange.handlers import tokens, pairs
 from dns_exchange.models.mongo.users import User
@@ -5,6 +7,7 @@ from dns_exchange.models.mongo.users import User
 from tests import helpers
 
 
+@pytest.mark.usefixtures("clean_db")
 def test_add_token():
     user_info = helpers.get_user(is_admin=True, auth_token=True)
     user = user_info['user']
@@ -19,6 +22,7 @@ def test_add_token():
     assert btc_count_from_db == btc_count
 
 
+@pytest.mark.usefixtures("clean_db")
 def test_buy():
     user_info = helpers.get_user(auth_token=True, is_admin=True)
     user = user_info['user']
@@ -40,6 +44,7 @@ def test_buy():
     assert 1 == 1
 
 
+@pytest.mark.usefixtures("clean_db")
 def test_sell():
     user_info = helpers.get_user(auth_token=True, is_admin=True)
     user = user_info['user']
