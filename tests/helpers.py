@@ -36,6 +36,6 @@ def get_user(is_admin=False, auth_token=False):
     return result
 
 
-def delete_objects(lst_with_objects: list):
+def clean_db(lst_with_objects: list):
     for obj in lst_with_objects:
         obj.delete()
