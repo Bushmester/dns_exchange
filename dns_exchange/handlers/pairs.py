@@ -116,5 +116,6 @@ class PairInfoCommandData:
 @auth_not_required
 def pair_info(**kwargs):
     data = PairInfoCommandData(**kwargs)
+    response = Response()
     # TODO: Pair info logic
-    return Response()
+    return response
