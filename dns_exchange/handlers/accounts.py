@@ -15,10 +15,9 @@ def generate_auth_token() -> str:
 
 # create_account command
 @auth_not_required
-def create_account() -> Response:
+def create_account():
     new_account = User.create()
     new_account.save()
-
     response = Response()
     response.add_content_text(
         title="New account has been successfully created!",
