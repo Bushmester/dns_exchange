@@ -88,11 +88,13 @@ def list_pairs(**kwargs):
     data = ListPairsCommandData(**kwargs)
     response = Response()
 
-    pattern = r'([A-Z]{3,4}_' + f'{data.filter_by_label})' + r'|' + f'({data.filter_by_label}_' + r'[A-Z]{3,4})'
-    token_pairs_filtered = list(filter(lambda x: re.fullmatch(pattern, x.label), TokenPair.list()))
+    token_pairs = TokenPair.list()
+    if data.filter_by_label is not None:
+        pattern = r'([A-Z]{3,4}_' + f'{data.filter_by_label})' + r'|' + f'({data.filter_by_label}_' + r'[A-Z]{3,4})'
+        token_pairs = list(filter(lambda x: re.fullmatch(pattern, x.label), token_pairs))
 
-    if token_pairs_filtered:
-        response.add_content_table(headers=["label"], rows=[tp.label for tp in token_pairs_filtered])
+    if token_pairs:
+        response.add_content_table(headers=["label"], rows=[tp.label for tp in token_pairs])
     else:
         response.add_content_text(title="No pairs found!")
 

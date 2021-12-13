@@ -25,7 +25,7 @@ def create_account():
         lines=[
             f"address: {new_account.address}",
             f"seed_phrase: {new_account.seed_phrase}"
-        ],
+        ]
     )
 
     return response
