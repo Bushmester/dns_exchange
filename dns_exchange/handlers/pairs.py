@@ -92,7 +92,7 @@ def list_pairs(**kwargs):
     token_pairs_filtered = list(filter(lambda x: re.fullmatch(pattern, x.label), TokenPair.list()))
 
     if token_pairs_filtered:
-        response.add_content_table("", ["label"], [tp.label for tp in token_pairs_filtered])
+        response.add_content_table(headers=["label"], rows=[tp.label for tp in token_pairs_filtered])
     else:
         response.add_content_text(title="No pairs found!")
 

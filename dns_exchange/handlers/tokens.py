@@ -1,4 +1,3 @@
-from _ast import pattern
 from datetime import datetime
 
 from dns_exchange.handlers.helpers import admin_required, auth_required
@@ -55,8 +54,8 @@ def add_token(user, **kwargs):
 
     user_assets = dict(user.assets)
     user.assets[data.tag] = user_assets[data.tag] + data.quantity if data.tag in user_assets else data.quantity
-    response.add_content_text(title=f'You\'ve recieved {data.quantity} {data.tag} tokens!')
     user.save()
+    response.add_content_text(title=f'You\'ve recieved {data.quantity} {data.tag} tokens!')
 
     return response
 
@@ -91,13 +90,15 @@ def buy(user, **kwargs):
         )
     )
 
+    response_text_lines = []
+    token1, token2 = data.trading_pair.split('_')
+
     for sell_order in sell_orders:
         if data.amount > 0:
             order_exchange_rate = sell_order.exchange_rate
             order_amount = sell_order.amount
             buyer = user
             seller = User.retrieve(address=sell_order.address)
-            token1, token2 = data.trading_pair.split('_')
 
             with DBTransaction:
                 # If order filled fully
@@ -118,14 +119,17 @@ def buy(user, **kwargs):
                 seller_legit = seller.assets[token1] > 0
                 buyer_legit = buyer.assets[token2] > 0
 
-                if not all([seller_legit, buyer_legit]):
+                if all([seller_legit, buyer_legit]):
+                    response_text_lines.append(
+                        f'Bought {token1_amount} {token1} ({order_exchange_rate} {token2} per 1 {token1})'
+                    )
+                    data.amount -= token1_amount
+                else:
                     raise ValueError('Asset amount can\'t be negative!')
 
             # Delete order if seller unable to perform operation
             if not seller_legit:
                 sell_order.delete()
-
-            data.amount -= token1_amount
 
         else:
             break
@@ -138,8 +142,11 @@ def buy(user, **kwargs):
             amount=data.amount,
             address=user.address
         )
+        response_text_lines.append(
+            f'Placed {data.amount} {token1} buy order ({data.exchange_rate} {token2} per 1 {token1})'
+        )
 
-    # TODO: Add response text
+    response.add_content_text(lines=response_text_lines)
 
     return response
 
