@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Union
 
-from dns_exchange.handlers.helpers import admin_required, auth_required
+from dns_exchange.handlers.helpers import admin_required
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.common import DBTransaction
 from dns_exchange.models.mongo.token_pairs import BuyOrder, SellOrder

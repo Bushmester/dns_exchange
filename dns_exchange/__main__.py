@@ -7,10 +7,7 @@ from typing import Union
 
 from dns_exchange import config
 from dns_exchange.dictionaries import commands_dict
-from dns_exchange.handlers.tokens import buy
 from dns_exchange.helpers import Request, Response
-from dns_exchange.models.mongo.token_pairs import SellOrder, BuyOrder
-from dns_exchange.models.mongo.users import User
 from dns_exchange.registers import register_all_commands
 
 
