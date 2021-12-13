@@ -1,3 +1,4 @@
+from _ast import pattern
 from datetime import datetime
 
 from dns_exchange.handlers.helpers import admin_required, auth_required
@@ -35,7 +36,7 @@ def perform_transfer(user_from: User, user_to: User, token_tag: str, amount: flo
 
 # add_token command
 class AddTokenCommandData:
-    tag = String(minsize=3, maxsize=4)
+    tag = String(pattern=r'[A-Z]{3,4}')
     quantity = FloatNumber(minvalue=0.0)
 
     def __init__(self, **kwargs):
@@ -50,14 +51,14 @@ class AddTokenCommandData:
 @admin_required
 def add_token(user, **kwargs):
     data = AddTokenCommandData(**kwargs)
+    response = Response()
+
     user_assets = dict(user.assets)
-    if data.tag in user_assets:
-        user.assets[data.tag] = user_assets[data.tag] + data.quantity
-    else:
-        user.assets[data.tag] = data.quantity
-    # TODO: Add response text
+    user.assets[data.tag] = user_assets[data.tag] + data.quantity if data.tag in user_assets else data.quantity
+    response.add_content_text(title=f'You\'ve recieved {data.quantity} {data.tag} tokens!')
     user.save()
-    return Response()
+
+    return response
 
 
 # buy command
@@ -78,11 +79,10 @@ class BuyCommandData:
         self.exchange_rate = kwargs['exchange_rate'] if 'exchange_rate' in kwargs.keys() else None
 
 
-# @auth_required
-def buy(user="", **kwargs):
+@auth_required
+def buy(user, **kwargs):
     data = BuyCommandData(**kwargs)
     response = Response()
-    user = User.retrieve(address="0x2606cc37")  # TODO: Del this
 
     sell_orders = list(
         filter(
