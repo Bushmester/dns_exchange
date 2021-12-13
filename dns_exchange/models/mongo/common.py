@@ -5,11 +5,11 @@ from dns_exchange.models.interfaces.common import (
     BaseModelDictFieldInterface, BaseModelInterface,
     DBTransactionInterface,
 )
-from dns_exchange.database import db
+from dns_exchange.database import db, client
 
 
 def run_with_transaction(func, *args, **kwargs):
-    with db.start_session() as session:
+    with client.start_session() as session:
         with session.start_transaction():
             return func(*args, **kwargs)
 
@@ -19,13 +19,13 @@ class DBTransaction(DBTransactionInterface):
         self.transaction = None
 
     def enter(self):
-        session = db.start_session()
+        session = client.start_session()
         self.transaction = session.start_transaction()
         return self.transaction
 
-    def exit(self):
-        self.transaction.__exit__()
-        db.close()
+    def exit(self, exc_type, exc_value, tb):
+        self.transaction.__exit__(exc_type, exc_value, tb)
+        client.close()
 
 
 class BaseModelDictField(BaseModelDictFieldInterface, ABC):
