@@ -3,7 +3,7 @@ import re
 from dns_exchange.handlers.helpers import admin_required, auth_not_required
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.token_pairs import TokenPair
-from dns_exchange.validators import String, Number
+from dns_exchange.validators import String, IntNumber
 
 
 # add_pair command
@@ -84,7 +84,7 @@ class ListPairsCommandData:
 
 
 @auth_not_required
-def list_pair(**kwargs):
+def list_pairs(**kwargs):
     data = ListPairsCommandData(**kwargs)
     response = Response()
 
@@ -101,8 +101,8 @@ def list_pair(**kwargs):
 
 # pair_info command
 class PairInfoCommandData:
-    label = String(pattern=r'[a-z]{3,4}_[a-z]{3,4}')
-    number = Number(minvalue=1, maxvalue=50)
+    label = String(pattern=r'[A-Z]{3,4}_[A-Z]{3,4}')
+    number = IntNumber(minvalue=1, maxvalue=50)
 
     def __init__(self, **kwargs):
         # Required arguments

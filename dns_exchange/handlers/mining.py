@@ -1,12 +1,22 @@
+from random import uniform, randrange
+
 from dns_exchange.handlers.helpers import auth_required
 from dns_exchange.helpers import Response
-from dns_exchange.validators import Number
-from dns_exchange.handlers.helpers import get_random_mine_number, get_random_token_amount
+from dns_exchange.validators import IntNumber
+
+
+# Helpers
+def get_random_mine_number() -> int:
+    return randrange(1, 10)
+
+
+def get_random_token_amount() -> float:
+    return uniform(0, 10)
 
 
 # mine command
 class MineCommandData:
-    number = Number(minvalue=1, maxvalue=10)
+    number = IntNumber(minvalue=1, maxvalue=10)
 
     def __init__(self, **kwargs):
         # Required arguments

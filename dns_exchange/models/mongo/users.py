@@ -1,5 +1,5 @@
 from dns_exchange.models.interfaces.users import UserAssetsInterface, UserInterface
-from dns_exchange.models.mongo.common import MongoBaseModelDictField, MongoBaseModel
+from dns_exchange.models.mongo.common import BaseModelDictField as MongoBaseModelDictField, BaseModel as MongoBaseModel
 
 
 class UserAssets(MongoBaseModelDictField, UserAssetsInterface):

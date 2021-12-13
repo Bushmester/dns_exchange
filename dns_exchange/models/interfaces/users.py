@@ -11,6 +11,7 @@ class UserAssetsInterface(BaseModelDictFieldInterface, ABC):
 class UserInterface(BaseModelInterface, ABC):
     model_name = 'users'
     complex_attrs = ('assets',)
+    optional_attrs = {'is_admin': bool}
 
     def __init__(self, obj_id, is_new, **kwargs):
         super().__init__(obj_id, is_new, **kwargs)
@@ -21,7 +22,7 @@ class UserInterface(BaseModelInterface, ABC):
         return {
             'address': get_user_address(),
             'seed_phrase': get_user_seed_phrase(),
-            'is_admin': False,
+            'is_admin': kwargs['is_admin'] if 'is_admin' in kwargs else False,
             'assets': {},
             **super().get_default_kwargs(**kwargs)
         }
