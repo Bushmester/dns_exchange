@@ -113,7 +113,7 @@ def get_response_about_exchange_token(
 ):
     response = []
     with DBTransaction():
-        check = ""
+        check = None
         try:
             check = user.assets[give_token]
         except KeyError:
