@@ -63,7 +63,7 @@ def add_token(user, **kwargs):
 # buy command
 class BuyCommandData:
     trading_pair = String(pattern=r'[A-Z]{3,4}_[A-Z]{3,4}')
-    amount = FloatNumber(minvalue=0.1)
+    amount = FloatNumber(minvalue=0.0)
     exchange_rate = FloatNumber(minvalue=0.1)
 
     def __init__(self, **kwargs):
@@ -86,80 +86,80 @@ def buy(user, **kwargs):
 
     token1, token2 = data.trading_pair.split('_')
 
-    check = None
-    try:
-        check = user.assets[token2]
-    except KeyError:
-        pass
+    # with client.start_session() as session:
+    #     with session.start_transaction():
+    with DBTransaction():
+            check = None
+            try:
+                check = user.assets[token2]
+            except KeyError:
+                pass
 
-    if (check is None) or (check < data.amount * data.exchange_rate):
-        response_text_lines.append(f'You do not have enough {token2} to buy {token1} ')
-        response.add_content_text(lines=response_text_lines)
-        print(response_text_lines)
-        return response
+            if (check is None) or (check < data.amount * data.exchange_rate):
+                response.add_content_text(lines=[f'You do not have enough {token2} to buy {token1}!'])
+                return response
 
-    sell_orders = list(
-        filter(
-            lambda x: x.exchange_rate <= data.exchange_rate if data.exchange_rate is not None else True,
-            sorted(SellOrder.list(pair_label=data.trading_pair), key=lambda x: x.exchange_rate)
-        )
-    )
+            sell_orders = list(
+                filter(
+                    lambda x: x.exchange_rate <= data.exchange_rate if data.exchange_rate is not None else True,
+                    sorted(SellOrder.list(pair_label=data.trading_pair), key=lambda x: x.exchange_rate)
+                )
+            )
+            for sell_order in sell_orders:
+                if data.amount > 0:
+                    order_exchange_rate = sell_order.exchange_rate
+                    order_amount = sell_order.amount
+                    buyer = user
+                    seller = User.retrieve(address=sell_order.address)
 
-    for sell_order in sell_orders:
-        if data.amount > 0:
-            order_exchange_rate = sell_order.exchange_rate
-            order_amount = sell_order.amount
-            buyer = user
-            seller = User.retrieve(address=sell_order.address)
+                        # If order filled fully
+                    if data.amount >= order_amount:
+                        token1_amount = order_amount
+                        sell_order.delete()
+                        # If order filled partially
+                    else:
+                        token1_amount = data.amount
+                        sell_order.amount = sell_order.amount - data.amount
 
-            with DBTransaction:
-                # If order filled fully
-                if data.amount >= order_amount:
-                    token1_amount = order_amount
-                    sell_order.delete()
-                # If order filled partially
+                    token2_amount = token1_amount * order_exchange_rate
+
+                    perform_transfer(seller, buyer, token1, token1_amount)
+                    perform_transfer(buyer, seller, token2, token2_amount)
+
+                    # Check if buyer and seller balances are positive
+                    seller_legit = seller.assets[token1] > 0
+                    buyer_legit = buyer.assets[token2] > 0
+
+                    if all([seller_legit, buyer_legit]):
+                        response_text_lines.append(
+                            f'Bought {token1_amount} {token1} ({order_exchange_rate} {token2} per 1 {token1})'
+                        )
+
+                        data.amount -= token1_amount
+                    else:
+                        raise ValueError('Asset amount can\'t be negative!')
+
+                    # Delete order if seller unable to perform operation
+                    if not seller_legit:
+                        sell_order.delete()
+
                 else:
-                    token1_amount = data.amount
-                    sell_order.amount = sell_order.amount - data.amount
+                    break
 
-                token2_amount = token1_amount * order_exchange_rate
+            # Place buy order if needed
+            if data.amount > 0 and data.exchange_rate is not None:
+                BuyOrder.create(
+                    pair_label=data.trading_pair,
+                    exchange_rate=data.exchange_rate,
+                    amount=data.amount,
+                    address=user.address
+                ).save()
+                response_text_lines.append(
+                    f'Placed {data.amount} {token1} buy order ({data.exchange_rate} {token2} per 1 {token1})'
+                )
 
-                perform_transfer(seller, buyer, token1, token1_amount)
-                perform_transfer(buyer, seller, token2, token2_amount)
+            response.add_content_text(lines=response_text_lines)
 
-                # Check if buyer and seller balances are positive
-                seller_legit = seller.assets[token1] > 0
-                buyer_legit = buyer.assets[token2] > 0
-
-                if all([seller_legit, buyer_legit]):
-                    response_text_lines.append(
-                        f'Bought {token1_amount} {token1} ({order_exchange_rate} {token2} per 1 {token1})'
-                    )
-                    data.amount -= token1_amount
-                else:
-                    raise ValueError('Asset amount can\'t be negative!')
-
-            # Delete order if seller unable to perform operation
-            if not seller_legit:
-                sell_order.delete()
-
-        else:
-            break
-
-    # Place buy order if needed
-    if data.amount > 0 and data.exchange_rate is not None:
-        BuyOrder.create(
-            pair_label=data.trading_pair,
-            exchange_rate=data.exchange_rate,
-            amount=data.amount,
-            address=user.address
-        ).save()
-        response_text_lines.append(
-            f'Placed {data.amount} {token1} buy order ({data.exchange_rate} {token2} per 1 {token1})'
-        )
-
-    response.add_content_text(lines=response_text_lines)
-    print(response_text_lines)
     return response
 
 
