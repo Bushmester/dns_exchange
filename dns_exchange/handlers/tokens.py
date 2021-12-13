@@ -78,7 +78,7 @@ class BuyCommandData:
         self.exchange_rate = kwargs['exchange_rate'] if 'exchange_rate' in kwargs.keys() else None
 
 
-# @auth_required
+@auth_required
 def buy(user, **kwargs):
     data = BuyCommandData(**kwargs)
     response = Response()
