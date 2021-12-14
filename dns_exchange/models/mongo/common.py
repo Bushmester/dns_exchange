@@ -16,16 +16,17 @@ def run_with_transaction(func, *args, **kwargs):
 
 class DBTransaction(DBTransactionInterface):
     def __init__(self):
+        self.session = None
         self.transaction = None
 
     def enter(self):
-        session = client.start_session()
-        self.transaction = session.start_transaction()
+        self.session = client.start_session()
+        self.transaction = self.session.start_transaction()
         return self.transaction
 
     def exit(self, exc_type, exc_value, tb):
         self.transaction.__exit__(exc_type, exc_value, tb)
-        client.close()
+        self.session.end_session()
 
 
 class BaseModelDictField(BaseModelDictFieldInterface, ABC):
