@@ -5,7 +5,7 @@ from dns_exchange.models.interfaces.common import (
     BaseModelDictFieldInterface, BaseModelInterface,
     DBTransactionInterface,
 )
-from dns_exchange.database import db, client
+from dns_exchange.initialization import db, client
 
 
 def run_with_transaction(func, *args, **kwargs):
@@ -19,12 +19,12 @@ class DBTransaction(DBTransactionInterface):
         self.session = None
         self.transaction = None
 
-    def enter(self):
+    def __enter__(self):
         self.session = client.start_session()
         self.transaction = self.session.start_transaction()
         return self.transaction
 
-    def exit(self, exc_type, exc_value, tb):
+    def __exit__(self, exc_type, exc_value, tb):
         self.transaction.__exit__(exc_type, exc_value, tb)
         self.session.end_session()
 

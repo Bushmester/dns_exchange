@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Union
+from typing import Union, List
 
 from dns_exchange.config import COMMISSION
-from dns_exchange.handlers.helpers import admin_required, auth_required, StopTransaction
+from dns_exchange.handlers.helpers import admin_required, auth_required
 from dns_exchange.helpers import Response
+from dns_exchange.models.interfaces.errors import StopTransaction
 from dns_exchange.models.mongo.common import DBTransaction
 from dns_exchange.models.mongo.token_pairs import BuyOrder, SellOrder, TokenPair
 from dns_exchange.models.mongo.transactions import Transaction
@@ -95,12 +96,14 @@ def perform_transfer(user_from: User, user_to: User, token: str, amount: float) 
     ).save()
 
 
-def get_response_about_exchange_token(
+def get_exchange_token_response_lines(
         action: str,
         user: User,
         data: Union[BuyCommandData, SellCommandData]
-):
-    token1, token2 = data.trading_pair.split('_')
+) -> List[str]:
+    # main_token is the first token of the pair (e.g. "BTC" in "BTC_ETH" pair)
+    # main_token is the second token of the pair (e.g. "ETH" in "BTC_ETH" pair)
+    main_token, second_token = data.trading_pair.split('_')
     response_lines = []
 
     if action == 'buy':
@@ -126,40 +129,40 @@ def get_response_about_exchange_token(
             order_amount = order.amount
             order_user = User.retrieve(address=order.address)
 
-            token1_receiver = user if action == 'buy' else order_user
-            token1_sender = order_user if action == 'buy' else user
+            buyer = user if action == 'buy' else order_user
+            seller = order_user if action == 'buy' else user
 
             try:
                 with DBTransaction():
                     # If order filled fully
                     if amount_left >= order_amount:
-                        token1_amount = order_amount
+                        main_token_amount = order_amount
                         order.delete()
                     # If order filled partially
                     else:
-                        token1_amount = amount_left
+                        main_token_amount = amount_left
                         order.amount = order.amount - amount_left
 
-                    token2_amount = token1_amount * order_exchange_rate
+                    second_token_amount = main_token_amount * order_exchange_rate
 
-                    perform_transfer(token1_sender, token1_receiver, token=token1, amount=token1_amount)
-                    perform_transfer(token1_receiver, token1_sender, token=token2, amount=token2_amount)
+                    perform_transfer(seller, buyer, token=main_token, amount=main_token_amount)
+                    perform_transfer(buyer, seller, token=second_token, amount=second_token_amount)
 
-                    token1_sender_legit = token1_sender.assets[token1] > 0
-                    token1_receiver_legit = token1_receiver.assets[token2] > 0
+                    is_main_token_sender_legit = seller.assets[main_token] > 0
+                    is_main_token_receiver_legit = buyer.assets[second_token] > 0
 
-                    if all([token1_sender_legit, token1_receiver_legit]):
+                    if all([is_main_token_sender_legit, is_main_token_receiver_legit]):
                         response_lines.append(
-                            f'{"Bought" if action == "buy" else "Sold"} {token1_amount} {token1} ({order_exchange_rate} '
-                            f'{token2} per 1 {token1})'
+                            f'{"Bought" if action == "buy" else "Sold"} {main_token_amount} {main_token} '
+                            f'({order_exchange_rate} {second_token} per 1 {main_token})'
                         )
-                        amount_left -= token1_amount
+                        amount_left -= main_token_amount
                     else:
                         raise StopTransaction('Asset amount can\'t be negative!')
             except StopTransaction:
                 pass
 
-            if not token1_sender_legit:
+            if not is_main_token_sender_legit:
                 order.delete()
 
         else:
@@ -174,8 +177,8 @@ def get_response_about_exchange_token(
         ).save()
 
         response_lines.append(
-            f'Placed {amount_left} {token1} {"buy" if action == "buy" else "sell"} order '
-            f'({data.exchange_rate} {token2} per 1 {token1})'
+            f'Placed {amount_left} {main_token} {"buy" if action == "buy" else "sell"} order '
+            f'({data.exchange_rate} {second_token} per 1 {main_token})'
         )
 
     return response_lines
@@ -191,19 +194,19 @@ def buy(user, **kwargs):
     except TypeError:
         return Response(errors=["Pair label is incorrect!"])
 
-    token1, token2 = data.trading_pair.split('_')
+    main_token, second_token = data.trading_pair.split('_')
 
     # Check that user has enough tokens for the deal
     is_min_amount_satisfied = False
     try:
-        is_min_amount_satisfied = user.assets[token2] >= data.amount * data.exchange_rate
+        is_min_amount_satisfied = user.assets[second_token] >= data.amount * data.exchange_rate
     except KeyError:
         pass
     if not is_min_amount_satisfied:
-        return Response(errors=[f'You don\'t have enough {token2} to buy {token1}!'])
+        return Response(errors=[f'You don\'t have enough {second_token} to buy {main_token}!'])
 
     response.add_content_text(
-        lines=get_response_about_exchange_token(
+        lines=get_exchange_token_response_lines(
             action="buy",
             user=user,
             data=data
@@ -223,19 +226,19 @@ def sell(user, **kwargs):
     except TypeError:
         return Response(errors=["Pair label is incorrect!"])
 
-    token1, token2 = data.trading_pair.split('_')
+    main_token, second_token = data.trading_pair.split('_')
 
     # Check that user has enough tokens for the deal
     is_min_amount_satisfied = False
     try:
-        is_min_amount_satisfied = user.assets[token1] >= data.amount
+        is_min_amount_satisfied = user.assets[main_token] >= data.amount
     except KeyError:
         pass
     if not is_min_amount_satisfied:
-        return Response(errors=[f'You don\'t have enough {token1}!'])
+        return Response(errors=[f'You don\'t have enough {main_token}!'])
 
     response.add_content_text(
-        lines=get_response_about_exchange_token(
+        lines=get_exchange_token_response_lines(
             action="sell",
             user=user,
             data=data

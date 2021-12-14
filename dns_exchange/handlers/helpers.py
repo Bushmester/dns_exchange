@@ -4,10 +4,6 @@ from dns_exchange.dictionaries import auth_dict
 from dns_exchange.models.mongo.users import User
 
 
-class StopTransaction(Exception):
-    pass
-
-
 def check_auth_token(auth_token: str) -> None:
     if auth_token == '':
         raise KeyError('Auth token is empty!')

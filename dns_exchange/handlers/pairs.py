@@ -125,12 +125,12 @@ def pair_info(**kwargs):
     except TypeError:
         return Response(errors=["Pair label is incorrect!"])
     else:
-        token1, token2 = data.label.split('_')
+        main_token, second_token = data.label.split('_')
 
         sell_orders = sorted(SellOrder.list(pair_label=data.label), key=lambda x: x.exchange_rate)[:data.number]
         response.add_content_table(
             "Sell orders",
-            [f"exchange_rate({token1})", f"amount({token2})"],
+            [f"exchange_rate({main_token})", f"amount({second_token})"],
             sorted(
                 [[so.exchange_rate, so.amount] for so in sell_orders],
                 key=lambda x: x[0]
@@ -140,7 +140,7 @@ def pair_info(**kwargs):
         buy_orders = sorted(BuyOrder.list(pair_label=data.label), key=lambda x: x.exchange_rate)[:data.number]
         response.add_content_table(
             "Buy orders",
-            [f"exchange_rate({token1})", f"amount({token2})"],
+            [f"exchange_rate({main_token})", f"amount({second_token})"],
             sorted(
                 [[bo.exchange_rate, bo.amount] for bo in buy_orders],
                 key=lambda x: x[0],

@@ -5,19 +5,31 @@ from dns_exchange.models.interfaces.errors import ArgumentError
 from dns_exchange.models.interfaces.helpers import get_id
 
 
-class DBTransactionInterface(ABC):
-    def __enter__(self):
-        return self.enter()
-
-    def __exit__(self, exc_type, exc_value, tb):
-        self.exit(exc_type, exc_value, tb)
-
+class AuthDictionaryInterface(ABC):
     @abstractmethod
-    def enter(self):
+    def __contains__(self, item):
         pass
 
     @abstractmethod
-    def exit(self, exc_type, exc_value, tb):
+    def __setitem__(self, key, value):
+        pass
+
+    @abstractmethod
+    def __getitem__(self, key):
+        pass
+
+    @abstractmethod
+    def __delitem__(self, key):
+        pass
+
+
+class DBTransactionInterface(ABC):
+    @abstractmethod
+    def __enter__(self):
+        pass
+
+    @abstractmethod
+    def __exit__(self, exc_type, exc_value, tb):
         pass
 
 
