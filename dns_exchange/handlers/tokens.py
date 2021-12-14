@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Union
 
+from dns_exchange.config import COMMISSION
 from dns_exchange.handlers.helpers import admin_required, auth_required, StopTransaction
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.common import DBTransaction
@@ -80,6 +81,7 @@ def perform_transfer(user_from: User, user_to: User, token: str, amount: float) 
 
     # Deposit token to user_to
     user_to_assets_dict = dict(user_to.assets)
+    amount = amount * (1 - COMMISSION)
     user_to.assets[token] = user_to_assets_dict[token] + amount if token in user_to_assets_dict else amount
     user_to.save()
 

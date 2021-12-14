@@ -1,6 +1,6 @@
 import pytest
 
-from dns_exchange.handlers import tokens
+from dns_exchange.handlers import tokens, pairs
 from dns_exchange.models.mongo.users import User
 
 from tests import helpers
@@ -32,6 +32,8 @@ def test_buy():
     token1 = 'CAT'
     token2 = 'DOG'
     pair = f'{token1}_{token2}'
+
+    pairs.add_pair(auth_token=auth_token_1, token1=token1, token2=token2)
 
     tokens.add_token(auth_token=auth_token_1, tag=token1, quantity=15.0)
     tokens.add_token(auth_token=auth_token_2, tag=token2, quantity=10.0)
