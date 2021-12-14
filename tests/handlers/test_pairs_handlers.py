@@ -1,16 +1,13 @@
 import pytest
 
 from tests import helpers
-from dns_exchange.handlers import pairs, accounts
-from dns_exchange.models.mongo.users import User
-from dns_exchange.models.mongo.token_pairs import TokenPair
+from dns_exchange.handlers import pairs, tokens
+from dns_exchange.models.mongo.token_pairs import TokenPair, BuyOrder
 
 
 @pytest.mark.usefixtures("clean_db")
 def test_add_pairs():
-
     user_info = helpers.get_user(is_admin=True, auth_token=True)
-    user = user_info['user']
     auth_token = user_info['auth_token']
 
     token1 = 'STS'
@@ -27,9 +24,7 @@ def test_add_pairs():
 
 @pytest.mark.usefixtures("clean_db")
 def test_delete_pairs():
-
     user_info = helpers.get_user(is_admin=True, auth_token=True)
-    user = user_info['user']
     auth_token = user_info['auth_token']
 
     label = "KTK_PTK"
@@ -48,7 +43,6 @@ def test_delete_pairs():
 
 @pytest.mark.usefixtures("clean_db")
 def test_list_pairs():
-
     filter_by_label = "BTS"
     test_labels = ["BTS_MPS", "BTS_POK", "WER_BTS"]
     for label in test_labels:
@@ -58,3 +52,31 @@ def test_list_pairs():
     labels_from_db = response_from_list_pairs.content[0]['rows']
 
     assert labels_from_db == test_labels
+
+
+@pytest.mark.usefixtures("clean_db")
+def test_pair_info():
+    user_info = helpers.get_user(is_admin=True, auth_token=True)
+    auth_token = user_info['auth_token']
+
+    token1 = 'STS'
+    token2 = 'TNT'
+    label = f'{token1}_{token2}'
+
+    quantity_token_1 = 12.0
+
+    TokenPair.create(label=label).save()
+    tokens.add_token(auth_token=auth_token, tag=token2, quantity=quantity_token_1)
+
+    amount = 11.0
+    exchange_rate = 1.0
+
+    tokens.buy(trading_pair=label, amount=amount, exchange_rate=exchange_rate, auth_token=auth_token)
+
+    expected_result = [1.0, 11.0]
+    buy_order_from_db = BuyOrder.retrieve(pair_label=label, exchange_rate=exchange_rate, amount=amount)
+
+    response_from_pair_info = pairs.pair_info(auth_token='', label=label)
+    result_from_db = response_from_pair_info.content[1]['rows'][0]
+
+    assert expected_result == result_from_db and buy_order_from_db
