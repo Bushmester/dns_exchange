@@ -102,7 +102,10 @@ def get_exchange_token_response_lines(
         data: Union[BuyCommandData, SellCommandData]
 ) -> List[str]:
     # main_token is the first token of the pair (e.g. "BTC" in "BTC_ETH" pair)
-    # main_token is the second token of the pair (e.g. "ETH" in "BTC_ETH" pair)
+    # second_token is the second token of the pair (e.g. "ETH" in "BTC_ETH" pair)
+    # The reason to use these definitions because terms buy/sell are applied to the first (main)
+    # token of the pair (e.g. in pair "BTC_ETH" we buy or sell BTC for ETH, there is no such
+    # operation as "buy ETH", because that simply means "sell BTC")
     main_token, second_token = data.trading_pair.split('_')
     response_lines = []
 
