@@ -32,7 +32,7 @@ def add_token(user, **kwargs):
     user_assets = dict(user.assets)
     user.assets[data.tag] = user_assets[data.tag] + data.quantity if data.tag in user_assets else data.quantity
     user.save()
-    response.add_content_text(title=f'You\'ve recieved {data.quantity} {data.tag} tokens!')
+    response.add_content_text(title=f'You\'ve received {data.quantity} {data.tag} tokens!')
 
     return response
 
@@ -80,10 +80,7 @@ def perform_transfer(user_from: User, user_to: User, token: str, amount: float) 
 
     # Deposit token to user_to
     user_to_assets_dict = dict(user_to.assets)
-    if token in user_to_assets_dict:
-        user_to.assets[token] = user_to_assets_dict[token] + amount
-    else:
-        user_to.assets[token] = amount
+    user_to.assets[token] = user_to_assets_dict[token] + amount if token in user_to_assets_dict else amount
     user_to.save()
 
     # Create user_from to user_to transaction record
