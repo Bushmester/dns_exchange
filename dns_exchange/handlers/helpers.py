@@ -3,6 +3,10 @@ import functools
 from dns_exchange.dictionaries import auth_dict
 
 
+class StopTransaction(Exception):
+    pass
+
+
 def check_auth_token(auth_token: str) -> None:
     if auth_token == '':
         raise KeyError('Auth token is empty!')

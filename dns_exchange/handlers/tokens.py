@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Union
 
-from dns_exchange.handlers.helpers import admin_required, auth_required
+from dns_exchange.handlers.helpers import admin_required, auth_required, StopTransaction
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.common import DBTransaction
-from dns_exchange.models.mongo.token_pairs import BuyOrder, SellOrder
+from dns_exchange.models.mongo.token_pairs import BuyOrder, SellOrder, TokenPair
 from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.models.mongo.users import User
 from dns_exchange.validators import String, FloatNumber
@@ -73,23 +73,17 @@ class SellCommandData:
         self.exchange_rate = kwargs['exchange_rate'] if 'exchange_rate' in kwargs.keys() else None
 
 
-orders_classes = {
-    "buy": BuyOrder,
-    "sell": SellOrder
-}
-
-
-def perform_transfer(user_from: User, user_to: User, token_tag: str, amount: float) -> None:
-    # Withdraw token_tag from user_from
-    user_from.assets[token_tag] = user_from.assets[token_tag] - amount
+def perform_transfer(user_from: User, user_to: User, token: str, amount: float) -> None:
+    # Withdraw token from user_from
+    user_from.assets[token] = user_from.assets[token] - amount
     user_from.save()
 
-    # Deposit token_tag to user_to
+    # Deposit token to user_to
     user_to_assets_dict = dict(user_to.assets)
-    if token_tag in user_to_assets_dict:
-        user_to.assets[token_tag] = user_to_assets_dict[token_tag] + amount
+    if token in user_to_assets_dict:
+        user_to.assets[token] = user_to_assets_dict[token] + amount
     else:
-        user_to.assets[token_tag] = amount
+        user_to.assets[token] = amount
     user_to.save()
 
     # Create user_from to user_to transaction record
@@ -97,109 +91,95 @@ def perform_transfer(user_from: User, user_to: User, token_tag: str, amount: flo
         date=datetime.utcnow(),
         from_=user_from.address,
         to=user_to.address,
-        token=token_tag,
+        token=token,
         amount=amount
     ).save()
 
 
-# receive_token - получить/купить
-# give_token - отдать/продать
 def get_response_about_exchange_token(
-        func: str,
+        action: str,
         user: User,
-        receiver_token: str,
-        give_token: str,
         data: Union[BuyCommandData, SellCommandData]
 ):
-    response = []
-    with DBTransaction():
-        check = None
-        try:
-            check = user.assets[give_token]
-        except KeyError:
-            pass
-        if (check is None) or (check == 0) or (check < data.amount * data.exchange_rate):
-            return response.append(f'You do not have enough {give_token} to buy {receiver_token}!')
+    token1, token2 = data.trading_pair.split('_')
+    response_lines = []
 
-        if isinstance(data, BuyCommandData):
-            orders = list(
-                filter(
-                    lambda x: x.exchange_rate <= data.exchange_rate if data.exchange_rate is not None else True,
-                    sorted(SellOrder.list(pair_label=data.trading_pair), key=lambda x: x.exchange_rate)
-                )
+    if action == 'buy':
+        orders = list(
+            filter(
+                lambda x: x.exchange_rate <= data.exchange_rate if data.exchange_rate is not None else True,
+                sorted(SellOrder.list(pair_label=data.trading_pair), key=lambda x: x.exchange_rate)
             )
+        )
+    else:
+        orders = list(
+            filter(
+                lambda x: x.exchange_rate >= data.exchange_rate if data.exchange_rate is not None else True,
+                sorted(BuyOrder.list(pair_label=data.trading_pair), key=lambda x: x.exchange_rate)
+            )
+        )
+
+    amount_left = data.amount
+
+    for order in orders:
+        if amount_left > 0:
+            order_exchange_rate = order.exchange_rate
+            order_amount = order.amount
+            order_user = User.retrieve(address=order.address)
+
+            token1_receiver = user if action == 'buy' else order_user
+            token1_sender = order_user if action == 'buy' else user
+
+            try:
+                with DBTransaction():
+                    # If order filled fully
+                    if amount_left >= order_amount:
+                        token1_amount = order_amount
+                        order.delete()
+                    # If order filled partially
+                    else:
+                        token1_amount = amount_left
+                        order.amount = order.amount - amount_left
+
+                    token2_amount = token1_amount * order_exchange_rate
+
+                    perform_transfer(token1_sender, token1_receiver, token=token1, amount=token1_amount)
+                    perform_transfer(token1_receiver, token1_sender, token=token2, amount=token2_amount)
+
+                    token1_sender_legit = token1_sender.assets[token1] > 0
+                    token1_receiver_legit = token1_receiver.assets[token2] > 0
+
+                    if all([token1_sender_legit, token1_receiver_legit]):
+                        response_lines.append(
+                            f'{"Bought" if action == "buy" else "Sold"} {token1_amount} {token1} ({order_exchange_rate} '
+                            f'{token2} per 1 {token1})'
+                        )
+                        amount_left -= token1_amount
+                    else:
+                        raise StopTransaction('Asset amount can\'t be negative!')
+            except ValueError:
+                pass
+
+            if not token1_sender_legit:
+                order.delete()
+
         else:
-            orders = list(
-                filter(
-                    lambda x: x.exchange_rate >= data.exchange_rate if data.exchange_rate is not None else True,
-                    sorted(BuyOrder.list(pair_label=data.trading_pair), key=lambda x: x.exchange_rate)
-                )
-            )
+            break
 
-        amount = data.amount
+    if amount_left > 0 and data.exchange_rate is not None:
+        (BuyOrder if action == 'buy' else SellOrder).create(
+            pair_label=data.trading_pair,
+            exchange_rate=data.exchange_rate,
+            amount=amount_left,
+            address=user.address
+        ).save()
 
-        for order in orders:
-            if amount > 0:
-                order_exchange_rate = order.exchange_rate
-                order_amount = order.amount
-                receiver = user if isinstance(data, BuyCommandData) else User.retrieve(address=order.address)
-                giver = user if isinstance(data, SellCommandData) else User.retrieve(address=order.address)
+        response_lines.append(
+            f'Placed {amount_left} {token1} {"buy" if action == "buy" else "sell"} order '
+            f'({data.exchange_rate} {token2} per 1 {token1})'
+        )
 
-                # If order filled fully
-                if amount >= order_amount:
-                    receiver_token_amount = order_amount
-                    order.delete()
-                # If order filled partially
-                else:
-                    receiver_token_amount = amount
-                    order.amount = order.amount - amount
-
-                give_token_amount = receiver_token_amount * order_exchange_rate
-                print(receiver.address)
-                print(giver.address)
-
-                perform_transfer(
-                    giver,
-                    receiver,
-                    token_tag=receiver_token if isinstance(data, BuyCommandData) else give_token,
-                    amount=receiver_token_amount if isinstance(data, BuyCommandData) else give_token_amount
-                )
-                perform_transfer(
-                    receiver,
-                    giver,
-                    token_tag=give_token if isinstance(data, BuyCommandData) else receiver_token,
-                    amount=give_token_amount if isinstance(data, BuyCommandData) else receiver_token_amount
-                )
-
-                giver_legit = giver.assets[receiver_token] > 0
-                receiver_legit = receiver.assets[give_token] > 0
-
-                if all([giver_legit, receiver_legit]):
-                    response.append(
-                        f'Bought {receiver_token_amount} {receiver_token} ({order_exchange_rate} {give_token} per 1 {receiver_token}) '
-                    )
-                    amount -= receiver_token_amount
-                else:
-                    raise ValueError('Asset amount can\'t be negative!')
-
-                if not giver_legit:
-                    order.delete()
-
-            else:
-                break
-
-        if amount > 0 and data.exchange_rate is not None:
-            orders_classes[func].create(
-                pair_label=data.trading_pair,
-                exchange_rate=data.exchange_rate,
-                amount=amount,
-                address=user.address
-            ).save()
-            response.append(
-                f'Placed {amount} {receiver_token} buy order ({data.exchange_rate} {give_token} per 1 {receiver_token})'
-            )
-
-    return response
+    return response_lines
 
 
 @auth_required
@@ -207,17 +187,30 @@ def buy(user, **kwargs):
     data = BuyCommandData(**kwargs)
     response = Response()
 
+    # try:
+    #     TokenPair.retrieve(label=data.trading_pair)
+    # except TypeError:
+    #     return Response(errors=["Pair label is incorrect!"])
+
     token1, token2 = data.trading_pair.split('_')
+
+    # Check that user has enough tokens for the deal
+    is_min_amount_satisfied = False
+    try:
+        is_min_amount_satisfied = user.assets[token2] >= data.amount * data.exchange_rate
+    except KeyError:
+        pass
+    if not is_min_amount_satisfied:
+        return Response(errors=[f'You don\'t have enough {token2} to buy {token1}!'])
 
     response.add_content_text(
         lines=get_response_about_exchange_token(
-            func="buy",
+            action="buy",
             user=user,
-            receiver_token=token1,
-            give_token=token2,
             data=data
         )
     )
+
     return response
 
 
@@ -226,15 +219,28 @@ def sell(user, **kwargs):
     data = SellCommandData(**kwargs)
     response = Response()
 
+    # try:
+    #     TokenPair.retrieve(label=data.trading_pair)
+    # except TypeError:
+    #     return Response(errors=["Pair label is incorrect!"])
+
     token1, token2 = data.trading_pair.split('_')
+
+    # Check that user has enough tokens for the deal
+    is_min_amount_satisfied = False
+    try:
+        is_min_amount_satisfied = user.assets[token1] >= data.amount
+    except KeyError:
+        pass
+    if not is_min_amount_satisfied:
+        return Response(errors=[f'You don\'t have enough {token1}!'])
 
     response.add_content_text(
         lines=get_response_about_exchange_token(
-            func="sell",
+            action="sell",
             user=user,
-            receiver_token=token2,
-            give_token=token1,
             data=data
         )
     )
+
     return response

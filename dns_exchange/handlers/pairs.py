@@ -39,7 +39,7 @@ def add_pair(user, **kwargs):
         pass
 
     if token_pair is not None:
-        response.add_error("Pair already exists!")
+        return Response(errors=["Pair already exists!"])
     else:
         TokenPair.create(label=f'{data.token1}_{data.token2}').save()
         response.add_content_text(title=f'{data.token1}_{data.token2} pair has been successfully added!')
@@ -66,7 +66,7 @@ def delete_pair(user, **kwargs):
     try:
         token_pair = TokenPair.retrieve(label=data.label)
     except TypeError:
-        response.add_error("Pair label is incorrect!")
+        return Response(errors=["Pair label is incorrect!"])
     else:
         token_pair.delete()
         response.add_content_text(title=f"{data.label} pair has been successfully removed!")
@@ -123,7 +123,7 @@ def pair_info(**kwargs):
     try:
         TokenPair.retrieve(label=data.label)
     except TypeError:
-        response.add_error("Pair label is incorrect!")
+        return Response(errors=["Pair label is incorrect!"])
     else:
         token1, token2 = data.label.split('_')
 

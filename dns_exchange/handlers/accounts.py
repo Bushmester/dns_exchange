@@ -49,7 +49,7 @@ def import_account(**kwargs):
     try:
         user = User.retrieve(seed_phrase=data.seed_phrase)
     except TypeError:
-        response.add_error("Seed phrase is incorrect!")
+        return Response(errors=["Seed phrase is incorrect!"])
     else:
         auth_token = generate_auth_token()
         auth_dict[auth_token] = user
@@ -89,7 +89,7 @@ def account_info(**kwargs):
     try:
         user = User.retrieve(address=data.address)
     except TypeError:
-        response.add_error("Address in incorrect!")
+        return Response(errors=["Address is incorrect!"])
     else:
         response.add_content_table("Assets", ["token", "amount"], list(dict(user.assets).items()))
         user_transactions = Transaction.list(from_=user.address)
