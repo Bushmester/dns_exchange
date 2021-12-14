@@ -136,21 +136,23 @@ def get_response_about_exchange_token(
                 )
             )
 
+        amount = data.amount
+
         for order in orders:
-            if data.amount > 0:
+            if amount > 0:
                 order_exchange_rate = order.exchange_rate
                 order_amount = order.amount
                 receiver = user if isinstance(data, BuyCommandData) else User.retrieve(address=order.address)
                 giver = user if isinstance(data, SellCommandData) else User.retrieve(address=order.address)
 
                 # If order filled fully
-                if data.amount >= order_amount:
+                if amount >= order_amount:
                     receiver_token_amount = order_amount
                     order.delete()
                 # If order filled partially
                 else:
-                    receiver_token_amount = data.amount
-                    order.amount = order.amount - data.amount
+                    receiver_token_amount = amount
+                    order.amount = order.amount - amount
 
                 give_token_amount = receiver_token_amount * order_exchange_rate
                 print(receiver.address)
@@ -176,7 +178,7 @@ def get_response_about_exchange_token(
                     response.append(
                         f'Bought {receiver_token_amount} {receiver_token} ({order_exchange_rate} {give_token} per 1 {receiver_token}) '
                     )
-                    data.amount -= receiver_token_amount
+                    amount -= receiver_token_amount
                 else:
                     raise ValueError('Asset amount can\'t be negative!')
 
@@ -186,15 +188,15 @@ def get_response_about_exchange_token(
             else:
                 break
 
-        if data.amount > 0 and data.exchange_rate is not None:
+        if amount > 0 and data.exchange_rate is not None:
             orders_classes[func].create(
                 pair_label=data.trading_pair,
                 exchange_rate=data.exchange_rate,
-                amount=data.amount,
+                amount=amount,
                 address=user.address
             ).save()
             response.append(
-                f'Placed {data.amount} {receiver_token} buy order ({data.exchange_rate} {give_token} per 1 {receiver_token})'
+                f'Placed {amount} {receiver_token} buy order ({data.exchange_rate} {give_token} per 1 {receiver_token})'
             )
 
     return response
