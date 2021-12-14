@@ -187,10 +187,10 @@ def buy(user, **kwargs):
     data = BuyCommandData(**kwargs)
     response = Response()
 
-    # try:
-    #     TokenPair.retrieve(label=data.trading_pair)
-    # except TypeError:
-    #     return Response(errors=["Pair label is incorrect!"])
+    try:
+        TokenPair.retrieve(label=data.trading_pair)
+    except TypeError:
+        return Response(errors=["Pair label is incorrect!"])
 
     token1, token2 = data.trading_pair.split('_')
 
@@ -219,10 +219,10 @@ def sell(user, **kwargs):
     data = SellCommandData(**kwargs)
     response = Response()
 
-    # try:
-    #     TokenPair.retrieve(label=data.trading_pair)
-    # except TypeError:
-    #     return Response(errors=["Pair label is incorrect!"])
+    try:
+        TokenPair.retrieve(label=data.trading_pair)
+    except TypeError:
+        return Response(errors=["Pair label is incorrect!"])
 
     token1, token2 = data.trading_pair.split('_')
 
