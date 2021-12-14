@@ -28,7 +28,7 @@ def test_import_account():
     response_from_import = accounts.import_account(seed_phrase=user.seed_phrase, auth_token='')
     auth_token = response_from_import.auth_token
 
-    seed_phrase_from_auth_dict = auth_dict[auth_token].seed_phrase
+    seed_phrase_from_auth_dict = User.retrieve(id=auth_dict[auth_token]).seed_phrase
 
     assert seed_phrase_from_auth_dict == user.seed_phrase
 

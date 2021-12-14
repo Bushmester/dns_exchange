@@ -52,7 +52,7 @@ def import_account(**kwargs):
         return Response(errors=["Seed phrase is incorrect!"])
     else:
         auth_token = generate_auth_token()
-        auth_dict[auth_token] = user
+        auth_dict[auth_token] = user.id
         response.auth_token = auth_token
         response.add_content_text(title="Account has been successfully imported!")
 

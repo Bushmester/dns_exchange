@@ -156,7 +156,7 @@ def get_response_about_exchange_token(
                         amount_left -= token1_amount
                     else:
                         raise StopTransaction('Asset amount can\'t be negative!')
-            except ValueError:
+            except StopTransaction:
                 pass
 
             if not token1_sender_legit:
