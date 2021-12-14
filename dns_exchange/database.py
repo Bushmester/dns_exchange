@@ -6,4 +6,4 @@ cluster = MONGO_DB_LINK
 client = MongoClient(cluster)
 db = client.dns
 
-redis = Redis()
+redis_db = Redis()
