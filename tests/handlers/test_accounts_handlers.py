@@ -1,6 +1,7 @@
 import pytest
 
-from dns_exchange.handlers import accounts
+from dns_exchange.handlers import accounts, tokens
+from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.models.mongo.users import User
 from dns_exchange.dictionaries import auth_dict
 
@@ -49,12 +50,17 @@ def test_my_account():
 
 @pytest.mark.usefixtures("clean_db")
 def test_account_info():
-    user_info = helpers.get_user()
+    user_info = helpers.get_user(is_admin=True, auth_token=True)
     user = user_info['user']
+    auth_token = user_info['auth_token']
+    tit_count = 3.0
 
+    response_from_add_token = tokens.add_token(auth_token=auth_token, tag='TIT', quantity=tit_count)
+    excepted_response_for_token_add = [("TIT", 3.0)]
     response_from_account_info = accounts.account_info(address=user.address, auth_token='', number=1)
+    response_for_token_add = response_from_account_info.content[0]["rows"]
 
-    assert response_from_account_info
+    assert str(response_for_token_add) == str(excepted_response_for_token_add)
 
 
 
