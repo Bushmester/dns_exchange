@@ -151,8 +151,8 @@ def get_exchange_token_response_lines(
                     perform_transfer(seller, buyer, token=main_token, amount=main_token_amount)
                     perform_transfer(buyer, seller, token=second_token, amount=second_token_amount)
 
-                    is_main_token_sender_legit = seller.assets[main_token] > 0
-                    is_main_token_receiver_legit = buyer.assets[second_token] > 0
+                    is_main_token_sender_legit = seller.assets[main_token] >= 0
+                    is_main_token_receiver_legit = buyer.assets[second_token] >= 0
 
                     if all([is_main_token_sender_legit, is_main_token_receiver_legit]):
                         response_lines.append(
