@@ -49,6 +49,7 @@ def test_buy():
     expected_balance_for_user_2 = {'DOG': 4.5, 'CAT': 4.995}
 
     response_from_buy = tokens.buy(trading_pair=pair, amount=5.0, exchange_rate=1.1, auth_token=auth_token_2)
+    response_from_sell = tokens.sell(trading_pair=pair, amount=10.0, exchange_rate=1.0, auth_token=auth_token_1)
 
     response_lines_from_buy = response_from_buy.content[0]['lines']
 
@@ -79,13 +80,13 @@ def test_sell():
     tokens.add_token(auth_token=auth_token_1, tag=token1, quantity=30.0)
     tokens.add_token(auth_token=auth_token_2, tag=token2, quantity=15.0)
 
-    expected_response_lines_for_sell = ["Sold 8.0 STS (1.5 TNT per 1 STS)",
-                                        "Placed 1.0 STS sell order (1.0 TNT per 1 STS)"]
+    expected_response_lines_for_sell = ['Sold 5.0 STS (1.4 TNT per 1 STS)',
+                                        'Placed 4.0 STS sell order (1.0 TNT per 1 STS)']
 
-    expected_balance_for_user_1 = {'STS': 22.0, 'TNT': 11.988}
-    expected_balance_for_user_2 = {'TNT': 3.0, 'STS': 7.992}
+    expected_balance_for_user_1 = {'STS': 25.0, 'TNT': 6.993}
+    expected_balance_for_user_2 = {'TNT': 8.0, 'STS': 4.995}
 
-    response_from_buy = tokens.buy(trading_pair=pair, amount=8.0, exchange_rate=1.5, auth_token=auth_token_2)
+    response_from_buy = tokens.buy(trading_pair=pair, amount=5.0, exchange_rate=1.4, auth_token=auth_token_2)
     response_from_sell = tokens.sell(trading_pair=pair, amount=9.0, exchange_rate=1.0, auth_token=auth_token_1)
 
     response_lines_from_sell = response_from_sell.content[0]['lines']
