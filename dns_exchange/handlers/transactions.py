@@ -1,4 +1,4 @@
-from dns_exchange.handlers.helpers import auth_not_required
+from dns_exchange.handlers.helpers import auth_not_required, catch_errors
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.validators import IntNumber
@@ -13,6 +13,7 @@ class ListTransactionsCommandData:
         self.number = kwargs['number'] if 'number' in kwargs.keys() else None
 
 
+@catch_errors
 @auth_not_required
 def list_transactions(**kwargs):
     data = ListTransactionsCommandData(**kwargs)

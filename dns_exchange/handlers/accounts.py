@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from dns_exchange.handlers.helpers import auth_not_required, auth_required
+from dns_exchange.handlers.helpers import auth_not_required, auth_required, catch_errors
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.transactions import Transaction
 from dns_exchange.models.mongo.users import User
@@ -14,6 +14,7 @@ def generate_auth_token() -> str:
 
 
 # create_account command
+@catch_errors
 @auth_not_required
 def create_account():
     response = Response()
@@ -41,6 +42,7 @@ class ImportAccountCommandData:
         self.seed_phrase = kwargs['seed_phrase']
 
 
+@catch_errors
 @auth_not_required
 def import_account(**kwargs):
     data = ImportAccountCommandData(**kwargs)
@@ -60,6 +62,7 @@ def import_account(**kwargs):
 
 
 # my_account command
+@catch_errors
 @auth_required
 def my_account(user):
     response = Response()
@@ -81,6 +84,7 @@ class AccountsInfoCommandData:
         self.number = kwargs['number'] if 'number' in kwargs else None
 
 
+@catch_errors
 @auth_not_required
 def account_info(**kwargs):
     data = AccountsInfoCommandData(**kwargs)

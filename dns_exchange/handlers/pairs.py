@@ -1,6 +1,6 @@
 import re
 
-from dns_exchange.handlers.helpers import admin_required, auth_not_required
+from dns_exchange.handlers.helpers import admin_required, auth_not_required, catch_errors
 from dns_exchange.helpers import Response
 from dns_exchange.models.mongo.token_pairs import TokenPair, SellOrder, BuyOrder
 from dns_exchange.validators import String, IntNumber
@@ -20,6 +20,7 @@ class AddPairCommandData:
         self.token2 = kwargs['token2']
 
 
+@catch_errors
 @admin_required
 def add_pair(user, **kwargs):
     _ = user
@@ -57,6 +58,7 @@ class DeletePairCommandData:
         self.label = kwargs['label']
 
 
+@catch_errors
 @admin_required
 def delete_pair(user, **kwargs):
     _ = user
@@ -83,6 +85,7 @@ class ListPairsCommandData:
         self.filter_by_label = kwargs['filter_by_label'] if 'filter_by_label' in kwargs.keys() else None
 
 
+@catch_errors
 @auth_not_required
 def list_pairs(**kwargs):
     data = ListPairsCommandData(**kwargs)
@@ -115,6 +118,7 @@ class PairInfoCommandData:
         self.number = kwargs['number'] if 'number' in kwargs.keys() else 5
 
 
+@catch_errors
 @auth_not_required
 def pair_info(**kwargs):
     data = PairInfoCommandData(**kwargs)

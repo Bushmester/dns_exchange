@@ -1,6 +1,6 @@
 from random import uniform, randrange
 
-from dns_exchange.handlers.helpers import auth_required
+from dns_exchange.handlers.helpers import auth_required, catch_errors
 from dns_exchange.helpers import Response
 from dns_exchange.validators import IntNumber
 
@@ -24,6 +24,7 @@ class MineCommandData:
         self.number = kwargs['number']
 
 
+@catch_errors
 @auth_required
 def mine(user, **kwargs):
     data = MineCommandData(**kwargs)

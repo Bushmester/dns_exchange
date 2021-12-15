@@ -1,8 +1,7 @@
-from datetime import datetime
 from typing import Union, List
 
 from dns_exchange.config import COMMISSION
-from dns_exchange.handlers.helpers import admin_required, auth_required
+from dns_exchange.handlers.helpers import admin_required, auth_required, catch_errors
 from dns_exchange.helpers import Response
 from dns_exchange.models.interfaces.errors import StopTransaction
 from dns_exchange.models.mongo.common import DBTransaction
@@ -26,6 +25,7 @@ class AddTokenCommandData:
         self.quantity = kwargs['quantity']
 
 
+@catch_errors
 @admin_required
 def add_token(user, **kwargs):
     data = AddTokenCommandData(**kwargs)
@@ -186,6 +186,7 @@ def get_exchange_token_response_lines(
     return response_lines
 
 
+@catch_errors
 @auth_required
 def buy(user, **kwargs):
     data = BuyCommandData(**kwargs)
@@ -218,6 +219,7 @@ def buy(user, **kwargs):
     return response
 
 
+@catch_errors
 @auth_required
 def sell(user, **kwargs):
     data = SellCommandData(**kwargs)
