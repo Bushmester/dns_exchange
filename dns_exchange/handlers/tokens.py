@@ -88,7 +88,6 @@ def perform_transfer(user_from: User, user_to: User, token: str, amount: float) 
 
     # Create user_from to user_to transaction record
     Transaction.create(
-        date=datetime.utcnow(),
         from_=user_from.address,
         to=user_to.address,
         token=token,
