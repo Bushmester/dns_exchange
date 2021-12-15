@@ -19,7 +19,10 @@ def test_add_pairs():
     pair_from_db = TokenPair.retrieve(label=label)
     label_from_db = pair_from_db.label
 
-    assert label == label_from_db
+    except_response_title_result = "STS_TNT pair has been successfully added!"
+    response_title_result = response_from_add_pair.content[0]['title']
+
+    assert label == label_from_db and response_title_result == except_response_title_result
 
 
 @pytest.mark.usefixtures("clean_db")
@@ -33,12 +36,15 @@ def test_delete_pairs():
 
     response_from_delete_pair = pairs.delete_pair(label=label, auth_token=auth_token)
 
+    except_response_title_result = "KTK_PTK pair has been successfully removed!"
+    response_title_result = response_from_delete_pair.content[0]['title']
+
     try:
         pair_from_db = TokenPair.retrieve(label=label)
     except TypeError:
         pair_from_db = None
 
-    assert pair_from_db is None
+    assert pair_from_db is None and except_response_title_result == response_title_result
 
 
 @pytest.mark.usefixtures("clean_db")
