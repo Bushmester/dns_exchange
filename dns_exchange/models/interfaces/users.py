@@ -10,12 +10,7 @@ class UserAssetsInterface(BaseModelDictFieldInterface, ABC):
 
 class UserInterface(BaseModelInterface, ABC):
     model_name = 'users'
-    complex_attrs = ('assets',)
     optional_attrs = {'is_admin': bool}
-
-    def __init__(self, obj_id, is_new, **kwargs):
-        super().__init__(obj_id, is_new, **kwargs)
-        self._assets = self.get_user_assets_class()(self._id, self.model_name)
 
     @classmethod
     def get_default_kwargs(cls, **kwargs):
@@ -26,11 +21,3 @@ class UserInterface(BaseModelInterface, ABC):
             'assets': {},
             **super().get_default_kwargs(**kwargs)
         }
-
-    def save_complex_attrs(self):
-        self._assets.save()
-
-    @staticmethod
-    @abstractmethod
-    def get_user_assets_class():
-        pass

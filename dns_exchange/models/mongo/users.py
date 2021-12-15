@@ -7,6 +7,4 @@ class UserAssets(MongoBaseModelDictField, UserAssetsInterface):
 
 
 class User(MongoBaseModel, UserInterface):
-    @staticmethod
-    def get_user_assets_class():
-        return UserAssets
+    complex_attrs = {'assets': UserAssets}

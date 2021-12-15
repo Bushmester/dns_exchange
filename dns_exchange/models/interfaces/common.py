@@ -83,7 +83,7 @@ class BaseModelDictFieldInterface(ABC):
 
 class BaseModelInterface(ABC):
     model_name = ''  # Set model name here, e.g. 'users'
-    complex_attrs = ()  # List complex attributes, e.g. ('assets',)
+    complex_attrs = {}  # Dict of complex attributes + their actual implemented class, e.g. {'assets': UserAssets}
     required_attrs = {}  # Dict of required attributes + their types, e.g. {'from': hex}
     optional_attrs = {}  # Dict of optional attributes + their types, e.g. {'is_admin': bool}
 
@@ -91,6 +91,9 @@ class BaseModelInterface(ABC):
         self._id = obj_id
         self._is_new = is_new
         self._attrs_to_save = {**kwargs}
+
+        for attr_name, attr_class in self.complex_attrs.items():
+            setattr(self, f'_{attr_name}', attr_class(self._id, self.model_name))
 
         # Initialize complex attributes here
         # e.g. self._assets = UserAssets(self._id)
@@ -104,8 +107,8 @@ class BaseModelInterface(ABC):
         }
 
     def save_complex_attrs(self):
-        # Call complex attributes .save() methods here, e.g. self._assets.save()
-        pass
+        for attr_name in self.complex_attrs:
+            getattr(self, f'_{attr_name}').save()
 
     """Interface to work with"""
 
