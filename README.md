@@ -5,7 +5,7 @@ It is a console based toy cryptocurrency exchange that uses sockets. There is si
 - **Auth token** is a token to define authenticated users. It's generated from account _seed phrase\*_ with using hash function.
 - **Hash address** is a unique string in the _0x\*\*\*\*\*\*\*\*_ format, where \* is any [a-f] or [0-9] symbol. It's generated during account creation, unique for every user and can not be changed! Hash address is used to define public account's name.
 - To **import account** is to simply log in to it with using _seed phrase\*_.
-- **Mining number** is a number from 1 to 10, which is stored on the server. The first account who guesses mining number gets random (from 1.0 to 10.0) amount of DNS to his assets. After number is guessed, it changes.
+- **Mining number** is a number from 1 to 10, which is stored on the server. The first account who guesses mining number gets random (from 0.0 to 10.0) amount of DNS to his assets. After number is guessed, it changes.
 - **Seed phrase** is a string consisting of 6 random english words. It's generated during account creation, unique for every user and can not be changed! Seed phrase is used to _import an account\*_.
 
 # Protocol

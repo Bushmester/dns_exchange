@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import socket
@@ -15,11 +16,11 @@ def handle_request(request) -> Union[Response, None]:
     command_func = commands_dict.get(request.command_name)
     if command_func is None:
         raise ValueError("Unknown command")
-    return command_func(**request.command_kwargs)
+    return command_func(auth_token=request.auth_token, **request.command_kwargs)
 
 
 def handle_client(conn, addr):
-    print(f"Using thread {threading.get_ident()} for client: {addr}!")
+    logging.info(f"Using thread {threading.get_ident()} for client: {addr}!")
 
     read_file = conn.makefile(mode="r", encoding="utf-8")
     write_file = conn.makefile(mode="w", encoding="utf-8")
@@ -56,7 +57,8 @@ def handle_client(conn, addr):
 
 def main():
     register_all_commands()
-    print(f"Started process with PID={os.getpid()}")
+    logging.basicConfig(level=config.LOGGING_LEVEL)
+    logging.info(f"Started process with PID={os.getpid()} on {config.HOST}:{config.PORT}")
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

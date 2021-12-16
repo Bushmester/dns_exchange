@@ -1,11 +1,35 @@
 from abc import ABC
 from typing import Any, List
 
-from dns_exchange.models.interfaces.common import BaseModelDictFieldInterface, BaseModelInterface
-from dns_exchange.database import db
+from dns_exchange.models.interfaces.common import (
+    BaseModelDictFieldInterface, BaseModelInterface,
+    DBTransactionInterface,
+)
+from dns_exchange.initialization import db, client
 
 
-class MongoBaseModelDictField(BaseModelDictFieldInterface, ABC):
+def run_with_transaction(func, *args, **kwargs):
+    with client.start_session() as session:
+        with session.start_transaction():
+            return func(*args, **kwargs)
+
+
+class DBTransaction(DBTransactionInterface):
+    def __init__(self):
+        self.session = None
+        self.transaction = None
+
+    def __enter__(self):
+        self.session = client.start_session()
+        self.transaction = self.session.start_transaction()
+        return self.transaction
+
+    def __exit__(self, exc_type, exc_value, tb):
+        self.transaction.__exit__(exc_type, exc_value, tb)
+        self.session.end_session()
+
+
+class BaseModelDictField(BaseModelDictFieldInterface, ABC):
     def _set_value(self, key: str, value: Any):
         db[self._owner_model_name].update_one({'id': self._owner_id}, {'$set': {f'{self.attr_name}.{key}': value}})
 
@@ -19,7 +43,7 @@ class MongoBaseModelDictField(BaseModelDictFieldInterface, ABC):
         return db[self._owner_model_name].find_one({'id': self._owner_id})[self.attr_name]
 
 
-class MongoBaseModel(BaseModelInterface, ABC):
+class BaseModel(BaseModelInterface, ABC):
     @classmethod
     def _create_obj(cls, **kwargs):
         db[cls.model_name].insert_one(kwargs)

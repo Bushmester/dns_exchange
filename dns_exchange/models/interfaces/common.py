@@ -1,13 +1,36 @@
 from abc import abstractmethod, ABC
 from typing import Any, List
 
-from bson import ObjectId
-
 from dns_exchange.models.interfaces.errors import ArgumentError
+from dns_exchange.models.interfaces.helpers import get_id
 
 
-def get_id():
-    return str(ObjectId())
+class AuthDictionaryInterface(ABC):
+    @abstractmethod
+    def __contains__(self, item):
+        pass
+
+    @abstractmethod
+    def __setitem__(self, key, value):
+        pass
+
+    @abstractmethod
+    def __getitem__(self, key):
+        pass
+
+    @abstractmethod
+    def __delitem__(self, key):
+        pass
+
+
+class DBTransactionInterface(ABC):
+    @abstractmethod
+    def __enter__(self):
+        pass
+
+    @abstractmethod
+    def __exit__(self, exc_type, exc_value, tb):
+        pass
 
 
 class BaseModelDictFieldInterface(ABC):
@@ -60,13 +83,17 @@ class BaseModelDictFieldInterface(ABC):
 
 class BaseModelInterface(ABC):
     model_name = ''  # Set model name here, e.g. 'users'
-    complex_attrs = ()  # List complex attributes, e.g. ('assets',)
-    required_attrs = {}  # Dict of required attributes, e.g. {'from': hex}
+    complex_attrs = {}  # Dict of complex attributes + their actual implemented class, e.g. {'assets': UserAssets}
+    required_attrs = {}  # Dict of required attributes + their types, e.g. {'from': hex}
+    optional_attrs = {}  # Dict of optional attributes + their types, e.g. {'is_admin': bool}
 
     def __init__(self, obj_id, is_new, **kwargs):
         self._id = obj_id
         self._is_new = is_new
         self._attrs_to_save = {**kwargs}
+
+        for attr_name, attr_class in self.complex_attrs.items():
+            setattr(self, f'_{attr_name}', attr_class(self._id, self.model_name))
 
         # Initialize complex attributes here
         # e.g. self._assets = UserAssets(self._id)
@@ -80,21 +107,28 @@ class BaseModelInterface(ABC):
         }
 
     def save_complex_attrs(self):
-        # Call complex attributes .save() methods here, e.g. self._assets.save()
-        pass
+        for attr_name in self.complex_attrs:
+            getattr(self, f'_{attr_name}').save()
 
     """Interface to work with"""
 
     @classmethod
     def create(cls, **kwargs):
-        if len(kwargs) != len(cls.required_attrs):
-            raise ArgumentError(f'Expected {len(cls.required_attrs)} arguments, but got {len(kwargs)}')
+        if len(kwargs) < len(cls.required_attrs):
+            raise ArgumentError(f'Expected {len(cls.required_attrs)} required arguments, but got {len(kwargs)}')
+        if len(kwargs) > len(cls.required_attrs) + len(cls.optional_attrs):
+            raise ArgumentError(
+                f'Expected maximum {len(cls.required_attrs) + len(cls.optional_attrs)} arguments, but got {len(kwargs)}'
+            )
         for key, key_type in cls.required_attrs.items():
             if key not in kwargs:
                 raise ArgumentError(f'Missing required "{key}" argument')
             if not isinstance(kwargs[key], key_type):
                 raise ArgumentError(f'Argument "{key}" must be of type "{key_type}"')
-
+        for key, key_type in cls.optional_attrs.items():
+            if key in kwargs:
+                if not isinstance(kwargs[key], key_type):
+                    raise ArgumentError(f'Argument "{key}" must be of type "{key_type}"')
         default_kwargs = cls.get_default_kwargs(**kwargs)
         return cls(**default_kwargs, obj_id=default_kwargs['id'], is_new=True)
 
